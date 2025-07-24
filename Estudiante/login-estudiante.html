@@ -45,6 +45,29 @@
     <button type="submit" class="btn btn-primary w-100">Ingresar</button>
   </form>
 
-  <script src="login-estudiante.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("loginForm");
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const usuario = document.getElementById("loginUsername").value.trim();
+        const contrasena = document.getElementById("loginPassword").value.trim();
+
+        const estudiantes = JSON.parse(localStorage.getItem("c2nEstudiantes")) || [];
+        const estudiante = estudiantes.find(e => e.usuario === usuario && e.contrasena === contrasena);
+
+        if (estudiante) {
+          localStorage.setItem("c2nEstudianteActivo", JSON.stringify(estudiante));
+          alert("Bienvenido/a " + estudiante.nombre);
+          window.location.href = "seleccion-servicio.html";
+        } else {
+          alert("Usuario o contraseña incorrectos.");
+        }
+      });
+    });
+  </script>
+
 </body>
 </html>
