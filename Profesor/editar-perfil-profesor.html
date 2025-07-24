@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Editar Perfil - Profesor C2N</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef2ff;
+    }
+
+    .container {
+      background-color: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 700px;
+      margin: 60px auto;
+    }
+
+    h2 {
+      color: #004aad;
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .form-check-label {
+      font-weight: normal;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Editar Perfil del Profesor</h2>
+    <form id="editarPerfilForm">
+      <div class="mb-3">
+        <label for="correo" class="form-label">Correo electrónico</label>
+        <input type="email" class="form-control" id="correo" required />
+      </div>
+
+      <div class="mb-3">
+        <label for="whatsapp" class="form-label">Número de WhatsApp</label>
+        <input type="tel" class="form-control" id="whatsapp" required />
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Materias que imparte:</label>
+        <div id="temasContainer"></div>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">Guardar cambios</button>
+    </form>
+  </div>
+
+  <script>
+    const temasDisponibles = [
+      "Matemáticas 1 (Secundaria)",
+      "Matemáticas 2 (Secundaria)",
+      "Matemáticas 3 (Secundaria)",
+      "Álgebra (Bachillerato)",
+      "Trigonometría (Bachillerato)",
+      "Geometría Analítica (Bachillerato)",
+      "Cálculo Diferencial (Bachillerato)",
+      "Cálculo Integral (Bachillerato)",
+      "Probabilidad y Estadística (Bachillerato)",
+      "Química Inorgánica (Bachillerato)",
+      "Química Orgánica (Bachillerato)",
+      "Física (Bachillerato)",
+      "Inglés (Secundaria)",
+      "Inglés (Bachillerato)"
+    ];
+
+    const profesor = JSON.parse(localStorage.getItem("c2nProfesorActivo") || "null");
+    const profesores = JSON.parse(localStorage.getItem("c2nProfesores") || "[]");
+
+    if (!profesor || !profesor.email) {
+      alert("No has iniciado sesión.");
+      window.location.href = "login-profesor.html";
+    }
+
+    document.getElementById("correo").value = profesor.email || "";
+    document.getElementById("whatsapp").value = profesor.whatsapp || "";
+
+    const temasContainer = document.getElementById("temasContainer");
+    temasDisponibles.forEach((tema, index) => {
+      const checked = profesor.temas.includes(tema) ? "checked" : "";
+      temasContainer.innerHTML += `
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" value="${tema}" id="tema${index}" ${checked}>
+          <label class="form-check-label" for="tema${index}">${String(index + 1).padStart(2, "0")} - ${tema}</label>
+        </div>
+      `;
+    });
+
+    document.getElementById("editarPerfilForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const nuevoCorreo = document.getElementById("correo").value.trim();
+      const nuevoWhats = document.getElementById("whatsapp").value.trim();
+      const nuevosTemas = Array.from(document.querySelectorAll("#temasContainer input:checked")).map(c => c.value);
+
+      const idx = profesores.findIndex(p => p.email === profesor.email);
+      if (idx === -1) {
+        alert("Error: profesor no encontrado.");
+        return;
+      }
+
+      // Actualizar datos
+      profesores[idx].email = nuevoCorreo;
+      profesores[idx].whatsapp = nuevoWhats;
+      profesores[idx].temas = nuevosTemas;
+
+      // Guardar
+      localStorage.setItem("c2nProfesores", JSON.stringify(profesores));
+
+      // Actualizar sesión activa
+      localStorage.setItem("c2nProfesorActivo", JSON.stringify(profesores[idx]));
+
+      alert("Perfil actualizado correctamente.");
+      window.location.href = "profesor-panel.html";
+    });
+  </script>
+</body>
+</html>

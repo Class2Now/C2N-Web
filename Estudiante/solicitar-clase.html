@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Solicitar Clase - C2N</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"/>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+      background: #f9fafb;
+    }
+    h1 {
+      text-align: center;
+      color: #1e3a8a;
+    }
+    label, select, input, button {
+      display: block;
+      width: 100%;
+      margin-top: 15px;
+      font-size: 1em;
+    }
+    button {
+      padding: 12px;
+      background-color: #1e40af;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #3749c8;
+    }
+    #fechaHoraDiv {
+      display: none;
+    }
+    #confirmacion {
+      background: white;
+      padding: 20px;
+      margin-top: 25px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    #confirmacion p {
+      margin: 8px 0;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Solicitar Clase</h1>
+
+<form id="formSolicitud">
+  <label for="tema">Tema:</label>
+  <select id="tema" required>
+    <!-- Aquí cargaremos los temas con sus códigos -->
+  </select>
+
+  <label>Tipo de inicio:</label>
+  <label><input type="radio" name="inicioTipo" value="inmediato" checked> Inicio inmediato (Videollamada)</label>
+  <label><input type="radio" name="inicioTipo" value="agendado"> Agendar fecha y hora</label>
+
+  <div id="fechaHoraDiv">
+    <label for="fechaHora">Selecciona fecha y hora:</label>
+    <input type="text" id="fechaHora" placeholder="Elige fecha y hora" />
+  </div>
+
+  <label for="numEstudiantes">Número de estudiantes:</label>
+  <input type="number" id="numEstudiantes" min="1" max="10" value="1" required />
+
+  <label for="nombresEstudiantes">Nombre(s) de estudiante(s) (separados por coma):</label>
+  <input type="text" id="nombresEstudiantes" placeholder="Ejemplo: Juan Pérez, Ana López" required />
+
+  <label for="formaPago">Forma de pago:</label>
+  <select id="formaPago" required>
+    <option value="">Selecciona</option>
+    <option value="transferencia">Transferencia</option>
+    <option value="oxxo">Pago en OXXO</option>
+  </select>
+
+  <button type="submit">Confirmar solicitud</button>
+</form>
+
+<div id="confirmacion" style="display:none;">
+  <h2>Confirmación de Solicitud</h2>
+  <p><strong>Número de solicitud:</strong> <span id="numSolicitud"></span></p>
+  <p><strong>Tema:</strong> <span id="confTema"></span></p>
+  <p><strong>Inicio:</strong> <span id="confInicio"></span></p>
+  <p><strong>Número de estudiantes:</strong> <span id="confNumEstudiantes"></span></p>
+  <p><strong>Nombre(s):</strong> <span id="confNombres"></span></p>
+  <p><strong>Forma de pago:</strong> <span id="confPago"></span></p>
+  <p><em>Esperando asignación de profesor...</em></p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+  // Temas con sus códigos
+  const temas = [
+    { codigo: "MAT", nombre: "Matemáticas" },
+    { codigo: "FIS", nombre: "Física" },
+    { codigo: "QUI", nombre: "Química" },
+    { codigo: "BIO", nombre: "Biología" },
+    { codigo: "ING", nombre: "Inglés" }
+  ];
+
+  // Cargar temas en select
+  const selectTema = document.getElementById('tema');
+  temas.forEach(t => {
+    const option = document.createElement('option');
+    option.value = t.codigo;
+    option.textContent = t.nombre;
+    selectTema.appendChild(option);
+  });
+
+  // Flatpickr para fecha y hora
+  const fechaHoraInput = document.getElementById('fechaHora');
+  const fp = flatpickr(fechaHoraInput, {
+    enableTime: true,
+    minDate: "today",
+    dateFormat: "Y-m-d H:i",
+  });
+
+  // Mostrar u ocultar calendario según tipo inicio
+  const inicioRadios = document.getElementsByName('inicioTipo');
+  const fechaHoraDiv = document.getElementById('fechaHoraDiv');
+  inicioRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      if (radio.value === 'agendado' && radio.checked) {
+        fechaHoraDiv.style.display = 'block';
+        fechaHoraInput.required = true;
+      } else if (radio.value === 'inmediato' && radio.checked) {
+        fechaHoraDiv.style.display = 'none';
+        fechaHoraInput.required = false;
+        fechaHoraInput.value = '';
+      }
+    });
+  });
+
+  // Función para generar número de solicitud (simplificada para demo)
+  function generarNumeroSolicitud(numControlUsuario, codigoTema, consecutivoUsuario, consecutivoGlobal) {
+    const fechaHora = new Date().toISOString().replace(/[-:]/g, '').slice(0,15);
+    // Estructura: numControlUsuario-codigoTema-fechaHora-consecutivoUsuario-consecutivoGlobal
+    return `${numControlUsuario}-${codigoTema}-${fechaHora}-${consecutivoUsuario}-${consecutivoGlobal}`;
+  }
+
+  // Obtener consecutivo global del mes (reset mensual)
+  function obtenerConsecutivoGlobal() {
+    const hoy = new Date();
+    const mesActual = hoy.getMonth() + 1;
+    const añoActual = hoy.getFullYear();
+
+    let consecutivos = JSON.parse(localStorage.getItem('c2nConsecutivosGlobal') || '{}');
+
+    if (!consecutivos.año || consecutivos.año !== añoActual || !consecutivos.mes || consecutivos.mes !== mesActual) {
+      // Reiniciar
+      consecutivos = { año: añoActual, mes: mesActual, valor: 0 };
+    }
+    consecutivos.valor++;
+    localStorage.setItem('c2nConsecutivosGlobal', JSON.stringify(consecutivos));
+    return consecutivos.valor;
+  }
+
+  // Obtener consecutivo usuario (incrementar)
+  function obtenerConsecutivoUsuario(numControlUsuario) {
+    let consecutivosUsuarios = JSON.parse(localStorage.getItem('c2nConsecutivosUsuarios') || '{}');
+    if (!consecutivosUsuarios[numControlUsuario]) {
+      consecutivosUsuarios[numControlUsuario] = 0;
+    }
+    consecutivosUsuarios[numControlUsuario]++;
+    localStorage.setItem('c2nConsecutivosUsuarios', JSON.stringify(consecutivosUsuarios));
+    return consecutivosUsuarios[numControlUsuario];
+  }
+
+  document.getElementById('formSolicitud').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const profesorActivo = JSON.parse(localStorage.getItem('c2nUsuarioActivo') || '{}');
+    if (!profesorActivo.numeroControl) {
+      alert('No se encontró número de control del usuario. Por favor inicia sesión.');
+      return;
+    }
+    const numControlUsuario = profesorActivo.numeroControl;
+    const codigoTema = selectTema.value;
+    const inicioTipo = document.querySelector('input[name="inicioTipo"]:checked').value;
+    const numEstudiantes = parseInt(document.getElementById('numEstudiantes').value);
+    const nombresEstudiantes = document.getElementById('nombresEstudiantes').value.trim();
+    const formaPago = document.getElementById('formaPago').value;
+
+    if (!codigoTema || !numEstudiantes || !nombresEstudiantes || !formaPago) {
+      alert('Por favor completa todos los campos.');
+      return;
+    }
+
+    let inicio;
+    if (inicioTipo === 'inmediato') {
+      inicio = 'Inmediato';
+    } else {
+      inicio = fechaHoraInput.value;
+      if (!inicio) {
+        alert('Por favor selecciona la fecha y hora.');
+        return;
+      }
+    }
+
+    // Obtener consecutivos
+    const consecutivoUsuario = obtenerConsecutivoUsuario(numControlUsuario);
+    const consecutivoGlobal = obtenerConsecutivoGlobal();
+
+    // Generar número de solicitud
+    const numeroSolicitud = generarNumeroSolicitud(numControlUsuario, codigoTema, consecutivoUsuario, consecutivoGlobal);
+
+    // Crear objeto solicitud
+    const solicitud = {
+      numeroSolicitud,
+      numControlUsuario,
+      codigoTema,
+      temaNombre: temas.find(t => t.codigo === codigoTema).nombre,
+      fechaHoraSolicitud: new Date().toISOString(),
+      inicio,
+      numEstudiantes,
+      nombresEstudiantes: nombresEstudiantes.split(',').map(s => s.trim()),
+      formaPago,
+      estado: 'pendiente',
+      whatsapps: [], // Se deja vacío, solo para el sistema, no se muestra al profesor
+      asignadoA: null
+    };
+
+    // Guardar solicitud en localStorage
+    let solicitudes = JSON.parse(localStorage.getItem('c2nSolicitudes') || '[]');
+    solicitudes.push(solicitud);
+    localStorage.setItem('c2nSolicitudes', JSON.stringify(solicitudes));
+
+    // Mostrar confirmación
+    document.getElementById('numSolicitud').textContent = numeroSolicitud;
+    document.getElementById('confTema').textContent = solicitud.temaNombre;
+    document.getElementById('confInicio').textContent = inicio;
+    document.getElementById('confNumEstudiantes').textContent = numEstudiantes;
+    document.getElementById('confNombres').textContent = solicitud.nombresEstudiantes.join(', ');
+    document.getElementById('confPago').textContent = formaPago;
+
+    // Ocultar formulario y mostrar confirmación
+    this.style.display = 'none';
+    document.getElementById('confirmacion').style.display = 'block';
+  });
+</script>
+
+</body>
+</html>

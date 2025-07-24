@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>C2N - Registro</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9fafb;
+      padding: 20px;
+      max-width: 500px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+    }
+    .error {
+      color: red;
+      font-size: 0.9em;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Registro - Class2Naow (C2N)</h1>
+  <form id="registerForm">
+    <label>Nombre completo
+      <input type="text" id="name" required />
+    </label>
+
+    <label>Fecha de nacimiento
+      <input type="date" id="dob" required max="" />
+    </label>
+
+    <label>Email
+      <input type="email" id="email" required />
+    </label>
+
+    <label>WhatsApp
+      <input type="tel" id="whatsapp" required pattern="[0-9]{10}" placeholder="5512345678" />
+    </label>
+
+    <div id="tutorWhatsappDiv" class="hidden">
+      <label>WhatsApp del tutor
+        <input type="tel" id="tutorWhatsapp" pattern="[0-9]{10}" placeholder="5512345678" />
+      </label>
+    </div>
+
+    <label>Usuario
+      <input type="text" id="username" required minlength="4" />
+    </label>
+
+    <label>Contraseña
+      <input type="password" id="password" required />
+      <small>Debe tener mayúsculas, letras y números</small>
+    </label>
+
+    <button type="submit">Registrar</button>
+    <p class="error" id="errorMsg"></p>
+  </form>
+
+  <script>
+    const dobInput = document.getElementById('dob');
+    const today = new Date().toISOString().split('T')[0];
+    dobInput.setAttribute('max', today);
+
+    function isAdult(dob) {
+      const birthDate = new Date(dob);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      return age >= 18;
+    }
+
+    dobInput.addEventListener('change', function () {
+      if (!isAdult(this.value)) {
+        document.getElementById('tutorWhatsappDiv').classList.remove('hidden');
+        document.getElementById('tutorWhatsapp').setAttribute('required', 'required');
+      } else {
+        document.getElementById('tutorWhatsappDiv').classList.add('hidden');
+        document.getElementById('tutorWhatsapp').removeAttribute('required');
+      }
+    });
+
+    function validatePassword(password) {
+      const hasUpper = /[A-Z]/.test(password);
+      const hasLower = /[a-z]/.test(password);
+      const hasNumber = /[0-9]/.test(password);
+      return hasUpper && hasLower && hasNumber;
+    }
+
+    document.getElementById('registerForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const name = document.getElementById('name').value.trim();
+      const dob = document.getElementById('dob').value;
+      const email = document.getElementById('email').value.trim();
+      const whatsapp = document.getElementById('whatsapp').value.trim();
+      const tutorWhatsapp = document.getElementById('tutorWhatsapp').value.trim();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      let errorMsg = "";
+
+      if (!validatePassword(password)) {
+        errorMsg = "La contraseña debe contener mayúsculas, letras y números.";
+      }
+
+      if (!dob || (!isAdult(dob) && !tutorWhatsapp)) {
+        errorMsg = "Si eres menor de edad, debes ingresar el WhatsApp del tutor.";
+      }
+
+      if (errorMsg) {
+        document.getElementById('errorMsg').textContent = errorMsg;
+        return;
+      }
+
+      const usuarios = JSON.parse(localStorage.getItem('c2nUsuarios') || '[]');
+
+      const existeEmail = usuarios.some(u => u.email === email);
+      const existeUsuario = usuarios.some(u => u.username === username);
+
+      if (existeEmail) {
+        errorMsg = "El email ya está registrado.";
+        document.getElementById('errorMsg').textContent = errorMsg;
+        return;
+      }
+      if (existeUsuario) {
+        errorMsg = "El usuario ya está registrado.";
+        document.getElementById('errorMsg').textContent = errorMsg;
+        return;
+      }
+
+      const numeroUsuario = usuarios.length + 1;
+
+      const userData = {
+        numeroUsuario,
+        name,
+        dob,
+        email,
+        whatsapp,
+        tutorWhatsapp,
+        username,
+        password
+      };
+
+      usuarios.push(userData);
+      localStorage.setItem('c2nUsuarios', JSON.stringify(usuarios));
+
+      // Guardamos también el usuario activo
+      localStorage.setItem('c2nUser', JSON.stringify(userData));
+
+      alert(`Registro exitoso. Tu número de usuario es: ${numeroUsuario}. Ya puedes iniciar sesión.`);
+      window.location.href = "servicio.html";
+    });
+  </script>
+</body>
+</html>

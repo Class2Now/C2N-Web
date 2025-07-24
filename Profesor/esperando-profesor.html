@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Buscando Profesor - C2N</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef2ff;
+      background-image: url('assets/logo-c2N.png');
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 400px;
+      padding: 50px 20px;
+      text-align: center;
+      color: #003366;
+    }
+
+    .container {
+      background-color: white;
+      padding: 30px;
+      max-width: 600px;
+      margin: auto;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      color: #004aad;
+    }
+
+    .loader {
+      margin: 30px auto;
+      border: 6px solid #cce;
+      border-top: 6px solid #004aad;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .btn-link {
+      display: none;
+      margin-top: 30px;
+      padding: 12px 24px;
+      font-size: 1.1em;
+      background-color: #004aad;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .btn-link:hover {
+      background-color: #003080;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Estamos buscando un profesor disponible...</h2>
+    <p>Tu solicitud está en proceso. En cuanto un profesor la acepte, te mostraremos aquí el enlace para ingresar a la videollamada.</p>
+
+    <div class="loader"></div>
+
+    <p><strong>Número de solicitud:</strong> <span id="numeroSolicitud">---</span></p>
+    <button id="btnEntrar" class="btn-link" onclick="entrarClase()">Entrar a la clase</button>
+  </div>
+
+  <script>
+    const estudiante = JSON.parse(localStorage.getItem("c2nEstudianteActivo"));
+    const solicitudes = JSON.parse(localStorage.getItem("c2nSolicitudes") || "[]");
+
+    // Buscar la solicitud más reciente del estudiante
+    const solicitud = solicitudes.reverse().find(s => s.numeroEstudiante === estudiante.numeroControl && s.estado === "asignado");
+
+    // Mostrar número de solicitud si ya fue asignado, o el último generado
+    const ultima = solicitudes.find(s => s.numeroEstudiante === estudiante.numeroControl);
+    document.getElementById("numeroSolicitud").textContent = ultima ? ultima.id : "---";
+
+    function verificarAsignacion() {
+      const actualizadas = JSON.parse(localStorage.getItem("c2nSolicitudes") || "[]");
+      const actual = actualizadas.find(s => s.numeroEstudiante === estudiante.numeroControl && s.link);
+
+      if (actual && actual.link) {
+        document.getElementById("btnEntrar").style.display = "inline-block";
+        localStorage.setItem("c2nLinkClase", actual.link);
+        clearInterval(intervalo);
+      }
+    }
+
+    function entrarClase() {
+      const link = localStorage.getItem("c2nLinkClase");
+      if (link) {
+        window.open(link, "_blank");
+      } else {
+        alert("Aún no hay enlace disponible.");
+      }
+    }
+
+    const intervalo = setInterval(verificarAsignacion, 5000);
+  </script>
+</body>
+</html>

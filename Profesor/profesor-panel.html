@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Panel del Profesor - C2N</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef2ff;
+    }
+
+    .container {
+      background-color: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 900px;
+      margin: 60px auto;
+    }
+
+    table {
+      margin-top: 30px;
+    }
+
+    th {
+      background-color: #004aad;
+      color: white;
+    }
+
+    td {
+      background-color: #e8f0ff;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="mb-0">Bienvenido, <span id="nombreProfesor"></span></h2>
+      <div>
+        <a href="editar-perfil-profesor.html" class="btn btn-outline-primary me-2">Editar Perfil</a>
+        <button onclick="logout()" class="btn btn-danger">Cerrar sesión</button>
+      </div>
+    </div>
+
+    <p><strong>Correo:</strong> <span id="correoProfesor"></span></p>
+    <p><strong>WhatsApp:</strong> <span id="whatsappProfesor"></span></p>
+    <p><strong>Fecha de registro:</strong> <span id="fechaRegistroProfesor"></span></p>
+    <p><strong>Temas que imparte:</strong> <span id="temasProfesor"></span></p>
+
+    <h4 class="mt-4">Clases aceptadas</h4>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Número de clase</th>
+          <th>Tema</th>
+          <th>Fecha</th>
+          <th>Duración</th>
+          <th>Factura</th>
+          <th>Pagada</th>
+          <th>Autorización</th>
+        </tr>
+      </thead>
+      <tbody id="tablaClases"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const profesor = JSON.parse(localStorage.getItem('c2nProfesorActivo') || 'null');
+    const clases = JSON.parse(localStorage.getItem('c2nClases') || '[]');
+
+    if (!profesor || !profesor.nombre) {
+      alert('No has iniciado sesión.');
+      window.location.href = 'login-profesor.html';
+    }
+
+    document.getElementById("nombreProfesor").textContent = profesor.nombre;
+    document.getElementById("correoProfesor").textContent = profesor.email;
+    document.getElementById("whatsappProfesor").textContent = profesor.whatsapp;
+    document.getElementById("fechaRegistroProfesor").textContent = profesor.fechaRegistro || "N/A";
+    document.getElementById("temasProfesor").textContent = (profesor.temas || []).join(', ');
+
+    const tbody = document.getElementById("tablaClases");
+    const clasesDelProfesor = clases.filter(c => c.emailProfesor === profesor.email);
+
+    if (clasesDelProfesor.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" class="text-center">Aún no has aceptado clases.</td></tr>';
+    } else {
+      clasesDelProfesor.forEach((clase, i) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${i + 1}</td>
+          <td>${clase.numeroControl}</td>
+          <td>${clase.tema}</td>
+          <td>${clase.fechaClase || '-'}</td>
+          <td>${clase.duracion?.horas || 0}h ${clase.duracion?.minutos || 0}min</td>
+          <td>${clase.factura || '-'}</td>
+          <td>${clase.pagada ? 'Sí' : 'No'}</td>
+          <td>${clase.autorizacion || '-'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function logout() {
+      localStorage.removeItem("c2nProfesorActivo");
+      window.location.href = "login-profesor.html";
+    }
+  </script>
+</body>
+</html>

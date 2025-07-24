@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Generar Solicitud - Estudiante</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fefefe;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      color: #0b3d91;
+    }
+    .info {
+      background: #f0f4f8;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    .info p {
+      margin: 8px 0;
+    }
+    button {
+      background: #0b3d91;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Confirmar Solicitud</h1>
+  <div class="info" id="resumenSolicitud"></div>
+  <button onclick="confirmarSolicitud()">Confirmar y Enviar</button>
+
+  <script>
+    const usuario = JSON.parse(localStorage.getItem('c2nUser'));
+    const seleccion = JSON.parse(localStorage.getItem('c2nSeleccion'));
+    const numeroControl = usuario.numeroUsuario || 'NC000';
+    const codigoTema = seleccion.codigoTema || 'OT';
+    const temaNombre = seleccion.tema;
+    const numeroEstudiantes = localStorage.getItem('c2nNumeroEstudiantes') || 1;
+
+    const now = new Date();
+    const fechaHora = now.toISOString().replace(/[-:T.]/g, '').slice(0, 12); // yyyyMMddHHmm
+
+    // Cargar consecutivo por usuario
+    const keyConsecutivoUsuario = `consecutivo_${numeroControl}`;
+    let consecutivoUsuario = parseInt(localStorage.getItem(keyConsecutivoUsuario) || '0') + 1;
+    localStorage.setItem(keyConsecutivoUsuario, consecutivoUsuario);
+
+    // Cargar consecutivo general por mes
+    const mesActual = now.toISOString().slice(0, 7); // yyyy-MM
+    const keyConsecutivoGlobal = `consecutivoGlobal_${mesActual}`;
+    let consecutivoGlobal = parseInt(localStorage.getItem(keyConsecutivoGlobal) || '0') + 1;
+    localStorage.setItem(keyConsecutivoGlobal, consecutivoGlobal);
+
+    // Generar número de solicitud
+    const numeroSolicitud = `${numeroControl}-${codigoTema}-${fechaHora}-${consecutivoUsuario}-${consecutivoGlobal}`;
+
+    // Mostrar resumen
+    const resumenDiv = document.getElementById('resumenSolicitud');
+    resumenDiv.innerHTML = `
+      <p><strong>Tema:</strong> ${temaNombre}</p>
+      <p><strong>Inicio:</strong> Inmediato</p>
+      <p><strong>Número de estudiantes:</strong> ${numeroEstudiantes}</p>
+      <p><strong>Número de solicitud:</strong> ${numeroSolicitud}</p>
+      <p><strong>Estudiante:</strong> ${usuario.name}</p>
+    `;
+
+    function confirmarSolicitud() {
+      const nuevaSolicitud = {
+        id: numeroSolicitud,
+        tema: temaNombre,
+        codigoTema: codigoTema,
+        numeroEstudiantes: parseInt(numeroEstudiantes),
+        nombre: usuario.name,
+        whatsapps: [usuario.whatsapp, usuario.tutorWhatsapp].filter(Boolean),
+        fecha: now.toLocaleDateString(),
+        hora: now.toLocaleTimeString(),
+        estado: 'pendiente',
+        asignadoA: null
+      };
+
+      const solicitudes = JSON.parse(localStorage.getItem('c2nSolicitudes') || '[]');
+      solicitudes.push(nuevaSolicitud);
+      localStorage.setItem('c2nSolicitudes', JSON.stringify(solicitudes));
+
+      alert('Solicitud enviada. Espera mientras buscamos a tu profesor.');
+      window.location.href = 'espera-profesor.html';
+    }
+  </script>
+</body>
+</html>

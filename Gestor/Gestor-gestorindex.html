@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inicio Gestor - Class2Naow</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9fafb;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    h1 {
+      color: #0f172a;
+      margin-bottom: 20px;
+    }
+
+    .login-box {
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      width: 300px;
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+      text-align: left;
+    }
+
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 12px;
+      width: 100%;
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #1d4ed8;
+    }
+
+    .error {
+      margin-top: 15px;
+      color: red;
+      font-size: 0.9em;
+    }
+
+    .link-registro {
+      margin-top: 20px;
+      font-size: 0.9em;
+    }
+
+    .link-registro a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+
+    .link-registro a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Bienvenido Gestor</h1>
+  <div class="login-box">
+    <form id="loginForm">
+      <label for="password">Contraseña:</label>
+      <input type="password" id="password" required />
+
+      <button type="submit">Entrar</button>
+      <p class="error" id="errorMsg"></p>
+    </form>
+
+    <div class="link-registro">
+      ¿Eres nuevo? <a href="registro-gestor.html">Regístrate aquí</a>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    const errorMsg = document.getElementById('errorMsg');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const pass = document.getElementById('password').value.trim();
+
+      const gestor = JSON.parse(localStorage.getItem('c2nGestor') || '{}');
+
+      if (!gestor || !gestor.password) {
+        errorMsg.textContent = 'No hay gestor registrado. Por favor regístrate.';
+        return;
+      }
+
+      if (pass !== gestor.password) {
+        errorMsg.textContent = 'Contraseña incorrecta.';
+        return;
+      }
+
+      // Acceso exitoso
+      errorMsg.textContent = '';
+      window.location.href = 'panel-gestor.html';
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Número de Solicitud</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 500px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f0f7ff;
+      color: #003366;
+      text-align: center;
+    }
+    h1 {
+      color: #004aad;
+      margin-bottom: 30px;
+    }
+    #numeroSolicitud {
+      font-size: 2em;
+      font-weight: bold;
+      color: #0077cc;
+      margin-bottom: 20px;
+    }
+    button {
+      background-color: #004aad;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      font-size: 1.2em;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    button:hover {
+      background-color: #00357c;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Tu número de solicitud es:</h1>
+  <div id="numeroSolicitud">Cargando...</div>
+
+  <button id="btnConfirmar">Confirmar</button>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const seleccionStr = localStorage.getItem('c2nSeleccion');
+      if (!seleccionStr) {
+        alert('No hay datos de selección. Regresa y selecciona un tema.');
+        window.location.href = 'seleccion-tema.html';
+        return;
+      }
+
+      const seleccion = JSON.parse(seleccionStr);
+
+      // Construir número de control usando códigoTema y númeroSolicitud con padding
+      const codigoTema = seleccion.codigoTema || '00';
+      const numeroSolicitud = seleccion.numeroSolicitud || 0;
+      const numeroControl = `${codigoTema}-${numeroSolicitud.toString().padStart(4, '0')}`;
+
+      document.getElementById('numeroSolicitud').textContent = numeroControl;
+
+      // Guardar el númeroControl si lo necesitas después
+      seleccion.numeroControl = numeroControl;
+      localStorage.setItem('c2nSeleccion', JSON.stringify(seleccion));
+
+      document.getElementById('btnConfirmar').addEventListener('click', () => {
+        // Puedes redirigir a pago o siguiente paso
+        window.location.href = 'pago.html';
+      });
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Generar Número de Solicitud - C2N</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f0f7ff;
+      color: #003366;
+    }
+    h1 {
+      text-align: center;
+      color: #004aad;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    select, input[type="number"], input[type="text"], input[type="date"] {
+      width: 100%;
+      padding: 8px;
+      font-size: 1em;
+      border-radius: 6px;
+      border: 1px solid #004aad;
+      margin-top: 5px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 30px;
+      width: 100%;
+      background-color: #004aad;
+      color: white;
+      font-weight: bold;
+      padding: 15px;
+      font-size: 1.2em;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #00357c;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Generar Número de Solicitud</h1>
+
+  <form id="formSolicitud">
+    <label for="registroEstudiante">Número de registro del estudiante:</label>
+    <input type="number" id="registroEstudiante" value="312" disabled />
+
+    <label for="fechaSolicitud">Fecha de solicitud:</label>
+    <input type="date" id="fechaSolicitud" required />
+
+    <label for="solicitudMensual">Número de solicitud mensual:</label>
+    <input type="number" id="solicitudMensual" value="76" required />
+
+    <label for="codigoTema">Tema:</label>
+    <select id="codigoTema" required>
+      <option value="">--Selecciona un tema--</option>
+      <option value="1">Matemáticas (1 Secundaria)</option>
+      <option value="2">Matemáticas (2 Secundaria)</option>
+      <option value="3">Matemáticas (3 Secundaria)</option>
+      <option value="4">Álgebra (Bachillerato)</option>
+      <option value="5">Trigonometría (Bachillerato)</option>
+      <option value="6">Geometría Analítica (Bachillerato)</option>
+      <option value="7">Cálculo Diferencial (Bachillerato)</option>
+      <option value="8">Cálculo Integral (Bachillerato)</option>
+      <option value="9">Probabilidad y Estadística (Bachillerato)</option>
+      <option value="10">Estadística Inferencial</option>
+      <option value="11">Matemáticas Financieras</option>
+      <option value="12">Química Inorgánica (Bachillerato)</option>
+      <option value="13">Química Orgánica (Bachillerato)</option>
+      <option value="14">Física (Bachillerato)</option>
+      <option value="15">Inglés (Secundaria)</option>
+      <option value="16">Inglés (Bachillerato)</option>
+      <option value="17">Inglés (Superior)</option>
+      <option value="18">Business English</option>
+      <option value="19">Matemáticas (Tronco común licenciaturas)</option>
+      <option value="20">Cálculo Diferencial (Tronco común Ingenierías)</option>
+      <option value="21">Cálculo Integral (Tronco común Ingenierías)</option>
+    </select>
+
+    <label for="tipoServicio">Tipo de servicio:</label>
+    <select id="tipoServicio" required>
+      <option value="">--Selecciona--</option>
+      <option value="V">Videollamada (V)</option>
+      <option value="AC">Agenda tu clase (AC)</option>
+    </select>
+
+    <label for="modalidad">Modalidad:</label>
+    <select id="modalidad" required>
+      <option value="">--Selecciona--</option>
+      <option value="I">Individual</option>
+      <option value="G">Grupal</option>
+    </select>
+
+    <label for="numEstudiantes" id="labelNumEstudiantes" style="display:none;">Número de estudiantes (solo para grupal):</label>
+    <input type="number" id="numEstudiantes" min="2" max="10" value="2" style="display:none;" />
+
+    <label for="tipoPago">Tipo de pago:</label>
+    <select id="tipoPago" required>
+      <option value="">--Selecciona--</option>
+      <option value="T">Transferencia (T)</option>
+      <option value="E">Efectivo (E)</option>
+      <option value="PP1">Prepago $500 (PP1)</option>
+      <option value="PP2">Prepago $1000 (PP2)</option>
+      <option value="PP3">Prepago $1500 (PP3)</option>
+    </select>
+
+    <button type="submit">Confirmar solicitud</button>
+  </form>
+
+  <script>
+    const modalidad = document.getElementById('modalidad');
+    const labelNumEstudiantes = document.getElementById('labelNumEstudiantes');
+    const inputNumEstudiantes = document.getElementById('numEstudiantes');
+
+    modalidad.addEventListener('change', () => {
+      if (modalidad.value === 'G') {
+        labelNumEstudiantes.style.display = 'block';
+        inputNumEstudiantes.style.display = 'block';
+      } else {
+        labelNumEstudiantes.style.display = 'none';
+        inputNumEstudiantes.style.display = 'none';
+        inputNumEstudiantes.value = 1;
+      }
+    });
+
+    document.getElementById('formSolicitud').addEventListener('submit', e => {
+      e.preventDefault();
+
+      const registro = '312'; // Simulado por ahora
+      const fecha = document.getElementById('fechaSolicitud').value;
+      const consecutivo = document.getElementById('solicitudMensual').value;
+      const tema = document.getElementById('codigoTema').value;
+      const servicio = document.getElementById('tipoServicio').value;
+      const modo = document.getElementById('modalidad').value;
+      const pago = document.getElementById('tipoPago').value;
+      const alumnos = inputNumEstudiantes.value;
+
+      if (!fecha || !consecutivo || !tema || !servicio || !modo || !pago) {
+        alert("Completa todos los campos obligatorios.");
+        return;
+      }
+
+      const f = new Date(fecha);
+      const dd = String(f.getDate()).padStart(2, '0');
+      const mm = String(f.getMonth() + 1).padStart(2, '0');
+      const yy = String(f.getFullYear()).slice(-2);
+      const fechaFormato = dd + mm + yy;
+
+      const modalidadFinal = modo === 'G' ? `${servicio}G${alumnos}` : `${servicio}I`;
+
+      const numeroSolicitud = [
+        registro,
+        fechaFormato,
+        consecutivo,
+        tema,
+        modalidadFinal,
+        pago
+      ].join('-');
+
+      localStorage.setItem('c2nNumeroSolicitud', numeroSolicitud);
+      window.location.href = 'confirmacion-solicitud.html';
+    });
+  </script>
+
+</body>
+</html>

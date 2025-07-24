@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ingreso Profesor - Class2Naow</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef2ff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .login-container {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      width: 320px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #333;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #555;
+    }
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    .password-container {
+      position: relative;
+    }
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: #3b82f6;
+    }
+    .strength-bar {
+      height: 6px;
+      border-radius: 4px;
+      background-color: #ddd;
+      margin-bottom: 0.5rem;
+      overflow: hidden;
+    }
+    .strength-bar-fill {
+      height: 100%;
+      width: 0%;
+      background-color: red;
+      transition: width 0.3s ease;
+    }
+    .strength-text {
+      font-size: 0.85rem;
+      color: #555;
+      margin-bottom: 1rem;
+      height: 18px;
+    }
+    button {
+      width: 100%;
+      background-color: #3b82f6;
+      color: white;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 4px;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+    button:disabled {
+      background-color: #a5b4fc;
+      cursor: not-allowed;
+    }
+    .error {
+      color: red;
+      margin-bottom: 1rem;
+      text-align: center;
+      font-weight: bold;
+      height: 18px;
+    }
+    .info {
+      color: green;
+      margin-bottom: 1rem;
+      text-align: center;
+      font-weight: bold;
+      height: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h2>Ingreso Profesor</h2>
+    <div id="error-msg" class="error"></div>
+    <div id="info-msg" class="info"></div>
+    <form id="loginForm">
+      <label for="email">Correo electrónico</label>
+      <input type="email" id="email" name="email" required />
+
+      <label for="password">Contraseña</label>
+      <div class="password-container">
+        <input type="password" id="password" name="password" required />
+        <button type="button" id="togglePassword" class="toggle-password" aria-label="Mostrar contraseña">Mostrar</button>
+      </div>
+
+      <div class="strength-bar" aria-hidden="true">
+        <div id="strengthBarFill" class="strength-bar-fill"></div>
+      </div>
+      <div id="strengthText" class="strength-text" aria-live="polite"></div>
+
+      <button type="submit" id="submitBtn">Ingresar</button>
+    </form>
+  </div>
+
+  <!-- Firebase SDKs clásicos -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+  <script>
+    // Configuración Firebase (usa la tuya)
+    const firebaseConfig = {
+      apiKey: "AIzaSyCxg4IY_yj89S7drl6pJAF4qcmZlu-bMK4",
+      authDomain: "class2now.firebaseapp.com",
+      projectId: "class2now",
+      storageBucket: "class2now.appspot.com",
+      messagingSenderId: "882381794790",
+      appId: "1:882381794790:web:a013eff4bc4701522dba27",
+      measurementId: "G-VMCL8BFLZX"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    const passwordInput = document.getElementById('password');
+    const togglePasswordBtn = document.getElementById('togglePassword');
+    const strengthBarFill = document.getElementById('strengthBarFill');
+    const strengthText = document.getElementById('strengthText');
+    const errorMsg = document.getElementById('error-msg');
+    const infoMsg = document.getElementById('info-msg');
+    const submitBtn = document.getElementById('submitBtn');
+    const emailInput = document.getElementById('email');
+    const loginForm = document.getElementById('loginForm');
+
+    // Mostrar/Ocultar contraseña
+    togglePasswordBtn.addEventListener('click', () => {
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        togglePasswordBtn.textContent = 'Ocultar';
+        togglePasswordBtn.setAttribute('aria-label', 'Ocultar contraseña');
+      } else {
+        passwordInput.type = 'password';
+        togglePasswordBtn.textContent = 'Mostrar';
+        togglePasswordBtn.setAttribute('aria-label', 'Mostrar contraseña');
+      }
+    });
+
+    // Función para evaluar fortaleza de contraseña
+    function evaluarFortaleza(pwd) {
+      let score = 0;
+      if (!pwd) return score;
+
+      if (pwd.length >= 8) score += 1;
+      if (/[A-Z]/.test(pwd)) score += 1;
+      if (/[a-z]/.test(pwd)) score += 1;
+      if (/\d/.test(pwd)) score += 1;
+      if (/[\W_]/.test(pwd)) score += 1;
+
+      return score;
+    }
+
+    // Actualizar barra y texto de fortaleza
+    passwordInput.addEventListener('input', () => {
+      const pwd = passwordInput.value;
+      const score = evaluarFortaleza(pwd);
+      const porcentaje = (score / 5) * 100;
+
+      strengthBarFill.style.width = porcentaje + '%';
+
+      let color = 'red';
+      let texto = 'Muy débil';
+
+      if (score === 5) {
+        color = 'green';
+        texto = 'Muy fuerte';
+      } else if (score >= 4) {
+        color = 'limegreen';
+        texto = 'Fuerte';
+      } else if (score >= 3) {
+        color = 'orange';
+        texto = 'Media';
+      } else if (score >= 2) {
+        color = 'orangered';
+        texto = 'Débil';
+      }
+
+      strengthBarFill.style.backgroundColor = color;
+      strengthText.textContent = texto;
+    });
+
+    // Validar email simple
+    function validarEmail(email) {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    }
+
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      errorMsg.textContent = '';
+      infoMsg.textContent = '';
+
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!validarEmail(email)) {
+        errorMsg.textContent = 'Correo electrónico no válido';
+        return;
+      }
+
+      if (password.length < 8) {
+        errorMsg.textContent = 'La contraseña debe tener al menos 8 caracteres';
+        return;
+      }
+
+      submitBtn.disabled = true;
+      infoMsg.textContent = 'Ingresando...';
+
+      auth.signInWithEmailAndPassword(email, password)
+        .then(userCredential => {
+          const user = userCredential.user;
+          localStorage.setItem('profesorSesion', JSON.stringify({
+            email: user.email,
+            uid: user.uid,
+            loggedIn: true,
+            fechaLogin: new Date().toISOString()
+          }));
+          window.location.href = 'profesor-panel.html';
+        })
+        .catch(error => {
+          errorMsg.textContent = error.message;
+          submitBtn.disabled = false;
+          infoMsg.textContent = '';
+        });
+    });
+  </script>
+</body>
+</html>

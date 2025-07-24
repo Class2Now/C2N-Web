@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Subir Facturas - Class2Naow</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef2ff;
+      background-image: url('assets/logo-c2N.png');
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 400px;
+      padding: 30px;
+    }
+
+    .container {
+      background-color: white;
+      border-radius: 10px;
+      padding: 30px;
+      max-width: 900px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #004aad;
+      margin-bottom: 30px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th {
+      background-color: #004aad;
+      color: white;
+      padding: 10px;
+    }
+
+    td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f0f6ff;
+    }
+
+    .btn {
+      background-color: #004aad;
+      color: white;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background-color: #003080;
+    }
+
+    .volver {
+      display: block;
+      margin: 30px auto 0;
+      text-align: center;
+    }
+
+    #btnPanelProfesor {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #004aad;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 50px;
+      font-weight: bold;
+      text-decoration: none;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      z-index: 999;
+      transition: background-color 0.3s;
+    }
+
+    #btnPanelProfesor:hover {
+      background-color: #002f7a;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Subir Facturas de Clases</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Número Solicitud</th>
+          <th>Tema</th>
+          <th>Fecha Clase</th>
+          <th>Factura Actual</th>
+          <th>Subir/Reemplazar</th>
+        </tr>
+      </thead>
+      <tbody id="tablaFacturas"></tbody>
+    </table>
+
+    <div class="volver">
+      <button class="btn" onclick="window.location.href='profesor-panel.html'">← Volver al Panel</button>
+    </div>
+  </div>
+
+  <script>
+    const profesor = JSON.parse(localStorage.getItem("c2nProfesorActivo"));
+    if (!profesor || !profesor.email) {
+      alert("No has iniciado sesión.");
+      window.location.href = "login-profesor.html";
+    }
+
+    // Mostrar botón flotante solo si hay sesión
+    if (profesor && profesor.email) {
+      const boton = document.createElement("a");
+      boton.id = "btnPanelProfesor";
+      boton.href = "profesor-panel.html";
+      boton.textContent = "Panel";
+      document.body.appendChild(boton);
+    }
+
+    const clases = JSON.parse(localStorage.getItem("c2nClases") || "[]");
+    const clasesFiltradas = clases.filter(c => c.profesor === profesor.email);
+
+    const tabla = document.getElementById("tablaFacturas");
+
+    if (clasesFiltradas.length === 0) {
+      tabla.innerHTML = `<tr><td colspan="6">Aún no has aceptado clases.</td></tr>`;
+    } else {
+      clasesFiltradas.forEach((clase, index) => {
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${clase.numeroSolicitud}</td>
+          <td>${clase.tema || "-"}</td>
+          <td>${clase.fechaClase || "-"}</td>
+          <td>${clase.factura || "No subida"}</td>
+          <td>
+            <input type="file" accept=".pdf,.jpg,.png,.xml" onchange="subirFactura(event, '${clase.numeroSolicitud}')"/>
+          </td>
+        `;
+
+        tabla.appendChild(row);
+      });
+    }
+
+    function subirFactura(event, numeroSolicitud) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const clases = JSON.parse(localStorage.getItem("c2nClases") || "[]");
+      const idx = clases.findIndex(c => c.numeroSolicitud === numeroSolicitud);
+
+      if (idx !== -1) {
+        clases[idx].factura = file.name;
+        localStorage.setItem("c2nClases", JSON.stringify(clases));
+        alert("Factura actualizada correctamente.");
+        location.reload();
+      } else {
+        alert("Clase no encontrada.");
+      }
+    }
+  </script>
+</body>
+</html>

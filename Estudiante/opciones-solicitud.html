@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Opciones de Solicitud - C2N</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f7ff;
+      max-width: 600px;
+      margin: 60px auto;
+      padding: 20px;
+      color: #003366;
+      text-align: center;
+    }
+    h1 {
+      color: #004aad;
+      margin-bottom: 40px;
+    }
+    button {
+      background-color: #004aad;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 18px 40px;
+      font-size: 1.3em;
+      cursor: pointer;
+      margin: 20px 15px;
+      min-width: 220px;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #00357c;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Modificar o Cancelar Solicitud</h1>
+
+  <button id="modificarBtn">Modificar solicitud</button>
+  <button id="cancelarBtn">Cancelar solicitud</button>
+
+  <script>
+    document.getElementById('modificarBtn').addEventListener('click', () => {
+      // Vamos a la selección de tema para modificar
+      window.location.href = 'seleccion-tema.html';
+    });
+
+    document.getElementById('cancelarBtn').addEventListener('click', () => {
+      // Limpiar selección y regresar a selección de servicio
+      localStorage.removeItem('c2nSeleccion');
+      window.location.href = 'servicio.html';
+    });
+  </script>
+
+</body>
+</html>

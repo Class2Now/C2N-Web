@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lanzar Solicitud - C2N</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 650px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f0f7ff;
+      color: #003366;
+    }
+    h1 {
+      text-align: center;
+      color: #004aad;
+      margin-bottom: 30px;
+    }
+    .dato {
+      margin-bottom: 15px;
+      font-size: 1.1em;
+    }
+    .lista-whatsapp {
+      margin-left: 20px;
+      margin-bottom: 20px;
+    }
+    .lista-whatsapp li {
+      margin-bottom: 5px;
+    }
+    .botones {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 40px;
+    }
+    button {
+      padding: 15px 30px;
+      font-size: 1.1em;
+      font-weight: bold;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      min-width: 140px;
+      transition: background-color 0.3s ease;
+    }
+    #confirmarBtn {
+      background-color: #004aad;
+      color: white;
+    }
+    #confirmarBtn:hover {
+      background-color: #00357c;
+    }
+    #modificarBtn {
+      background-color: #c62828;
+      color: white;
+    }
+    #modificarBtn:hover {
+      background-color: #8b1a1a;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Confirmar tu Solicitud</h1>
+
+  <div class="dato"><strong>Tema:</strong> <span id="temaNombre"></span></div>
+  <div class="dato"><strong>Modalidad:</strong> <span id="modalidad"></span></div>
+  <div class="dato" id="fechaHoraDiv" style="display:none;">
+    <strong>Fecha y hora agendada:</strong> <span id="fechaHora"></span>
+  </div>
+  <div class="dato" id="numEstudiantesDiv">
+    <strong>Número de estudiantes:</strong> <span id="numEstudiantes"></span>
+  </div>
+  <div class="dato">
+    <strong>WhatsApps de estudiantes:</strong>
+    <ul id="listaWhatsapps" class="lista-whatsapp"></ul>
+  </div>
+  <div class="dato"><strong>Número de solicitud:</strong> <span id="numeroSolicitud"></span></div>
+
+  <div class="botones">
+    <button id="confirmarBtn">CONFIRMAR CLASE</button>
+    <button id="modificarBtn">MODIFICAR</button>
+  </div>
+
+  <script>
+    // Cargar datos guardados en localStorage
+    const temaSeleccionado = JSON.parse(localStorage.getItem('c2nTemaSeleccion'));
+    const modalidad = localStorage.getItem('c2nModalidad'); // 'V' o 'AC'
+    const fechaAgendada = localStorage.getItem('c2nFechaAgendada'); // solo si modalidad AC
+    const horaAgendada = localStorage.getItem('c2nHoraAgendada');   // solo si modalidad AC
+    const numEstudiantes = localStorage.getItem('c2nNumEstudiantes') || '1';
+    const whatsAppsJSON = localStorage.getItem('c2nWhatsApps'); // array JSON de números
+    const numeroSolicitud = localStorage.getItem('c2nNumeroSolicitud');
+
+    // Mostrar tema
+    document.getElementById('temaNombre').textContent = temaSeleccionado ? temaSeleccionado.nombre : 'No definido';
+
+    // Mostrar modalidad y detalles
+    const modalidadSpan = document.getElementById('modalidad');
+    const fechaHoraDiv = document.getElementById('fechaHoraDiv');
+    const fechaHoraSpan = document.getElementById('fechaHora');
+
+    if (modalidad === 'V') {
+      modalidadSpan.textContent = 'Videollamada (Inmediata)';
+      fechaHoraDiv.style.display = 'none';
+    } else if (modalidad === 'AC') {
+      modalidadSpan.textContent = 'Agenda tu clase';
+      fechaHoraDiv.style.display = 'block';
+      fechaHoraSpan.textContent = fechaAgendada && horaAgendada ? fechaAgendada + ' - ' + horaAgendada : 'No definida';
+    } else {
+      modalidadSpan.textContent = 'No definida';
+      fechaHoraDiv.style.display = 'none';
+    }
+
+    // Número de estudiantes
+    document.getElementById('numEstudiantes').textContent = numEstudiantes;
+
+    // Lista de WhatsApps
+    const listaWhatsapps = document.getElementById('listaWhatsapps');
+    listaWhatsapps.innerHTML = '';
+    if (whatsAppsJSON) {
+      try {
+        const whatsApps = JSON.parse(whatsAppsJSON);
+        if (Array.isArray(whatsApps) && whatsApps.length) {
+          whatsApps.forEach(num => {
+            const li = document.createElement('li');
+            li.textContent = num;
+            listaWhatsapps.appendChild(li);
+          });
+        } else {
+          listaWhatsapps.innerHTML = '<li>No hay números registrados.</li>';
+        }
+      } catch {
+        listaWhatsapps.innerHTML = '<li>Error al cargar números.</li>';
+      }
+    } else {
+      listaWhatsapps.innerHTML = '<li>No hay números registrados.</li>';
+    }
+
+    // Número de solicitud
+    document.getElementById('numeroSolicitud').textContent = numeroSolicitud || 'No definido';
+
+    // Botones
+    document.getElementById('confirmarBtn').addEventListener('click', () => {
+      // Aquí puedes agregar la lógica para lanzar la solicitud a los profesores
+      // Por ahora redirigimos a la página de gracias
+      window.location.href = 'gracias-por-tu-solicitud.html';
+    });
+
+    document.getElementById('modificarBtn').addEventListener('click', () => {
+      // Regresa a elección de tipo de servicio (video llamada o agenda)
+      window.location.href = 'seleccion-servicio.html';
+    });
+  </script>
+
+</body>
+</html>

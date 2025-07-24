@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Confirmación de Agenda - C2N</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f7ff;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      color: #003366;
+      text-align: center;
+    }
+    h1 {
+      color: #004aad;
+      margin-bottom: 30px;
+    }
+    .info-box {
+      background-color: #e1edff;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 30px;
+      text-align: left;
+      font-size: 1.1em;
+      line-height: 1.5em;
+    }
+    .numero-control {
+      font-size: 1.4em;
+      font-weight: bold;
+      margin: 20px 0;
+      color: #0073e6;
+      text-align: center;
+    }
+    button {
+      border: none;
+      border-radius: 8px;
+      padding: 15px 30px;
+      font-size: 1.2em;
+      cursor: pointer;
+      margin: 15px 10px;
+      min-width: 220px;
+      transition: background-color 0.3s ease;
+    }
+    #confirmarBtn {
+      background-color: #004aad;
+      color: white;
+      font-weight: bold;
+    }
+    #confirmarBtn:hover {
+      background-color: #00357c;
+    }
+    #modificarCancelarBtn {
+      background-color: #cc0000;
+      color: white;
+      font-weight: bold;
+    }
+    #modificarCancelarBtn:hover {
+      background-color: #990000;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Confirmación de Agenda</h1>
+
+<div class="info-box" id="infoBox">
+  <p><strong>Tema:</strong> <span id="tema"></span></p>
+  <p><strong>Fecha y hora:</strong> <span id="fechaHora"></span></p>
+  <p><strong>Número de estudiantes:</strong> <span id="numEstudiantes"></span></p>
+  <p><strong>WhatsApp(s):</strong><br><span id="whatsapps"></span></p>
+</div>
+
+<p class="numero-control" id="numeroControl">Número de control: </p>
+
+<button id="confirmarBtn">Confirmar solicitud</button>
+<button id="modificarCancelarBtn">Modificar o cancelar solicitud</button>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCxg4IY_yj89S7drl6pJAF4qcmZlu-bMK4",
+    authDomain: "class2now.firebaseapp.com",
+    projectId: "class2now",
+    storageBucket: "class2now.appspot.com",
+    messagingSenderId: "882381794790",
+    appId: "1:882381794790:web:a013eff4bc4701522dba27",
+    measurementId: "G-VMCL8BFLZX"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  const seleccion = JSON.parse(localStorage.getItem('c2nSeleccion') || '{}');
+
+  document.getElementById('tema').textContent = seleccion.tema || 'No especificado';
+  document.getElementById('fechaHora').textContent = (seleccion.fecha && seleccion.hora) 
+    ? `${seleccion.fecha} a las ${seleccion.hora}` 
+    : (seleccion.fechaHora || 'No especificado');
+  document.getElementById('numEstudiantes').textContent = seleccion.numEstudiantes || 'No especificado';
+
+  const whatsappsElem = document.getElementById('whatsapps');
+  if (seleccion.whatsapps && seleccion.whatsapps.length > 0) {
+    whatsappsElem.innerHTML = seleccion.whatsapps
+      .map((num, i) => `Estudiante ${i + 1}: ${num}`)
+      .join('<br>');
+  } else {
+    whatsappsElem.textContent = 'No especificado';
+  }
+
+  const numeroControlElem = document.getElementById('numeroControl');
+  numeroControlElem.textContent = seleccion.numeroControl 
+    ? 'Número de control: ' + seleccion.numeroControl 
+    : 'Número de control no disponible.';
+
+  document.getElementById('confirmarBtn').addEventListener('click', async () => {
+    if (!seleccion.numeroControl) {
+      alert("Falta el número de control.");
+      return;
+    }
+
+    const solicitud = {
+      numeroControl: seleccion.numeroControl,
+      tema: seleccion.tema || 'No especificado',
+      fecha: seleccion.fecha || '',
+      hora: seleccion.hora || '',
+      numEstudiantes: seleccion.numEstudiantes || 1,
+      whatsapps: seleccion.whatsapps || [],
+      fechaRegistro: new Date().toISOString(),
+      estado: 'pendiente'
+    };
+
+    try {
+      await db.collection('solicitudes').add(solicitud);
+      alert('Solicitud confirmada y registrada.');
+      localStorage.removeItem('c2nSeleccion');
+      window.location.href = 'gracias.html';
+    } catch (error) {
+      console.error("Error al guardar solicitud:", error);
+      alert("Error al confirmar. Intenta nuevamente.");
+    }
+  });
+
+  document.getElementById('modificarCancelarBtn').addEventListener('click', () => {
+    window.location.href = 'seleccion-servicio.html';
+  });
+</script>
+
+</body>
+</html>

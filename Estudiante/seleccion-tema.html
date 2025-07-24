@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Selecciona el Tema - C2N</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+  <style>
+    body {
+      background-color: #eef3ff;
+      padding: 40px;
+      max-width: 600px;
+      margin: auto;
+      font-family: Arial, sans-serif;
+    }
+    h2 {
+      color: #004aad;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .form-label {
+      font-weight: bold;
+    }
+    .btn-primary {
+      background-color: #004aad;
+      border: none;
+    }
+    .btn-primary:hover {
+      background-color: #00357c;
+    }
+    .panel-button {
+      text-align: right;
+      margin-bottom: 10px;
+    }
+    .panel-button button {
+      font-size: 14px;
+      background-color: #004aad;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Botón de acceso al panel -->
+  <div class="panel-button">
+    <button onclick="window.location.href='panel-estudiante.html'">Ir al Panel</button>
+  </div>
+
+  <h2>Selecciona el Tema y Participantes</h2>
+
+  <form id="formSeleccionTema">
+    <div class="mb-3">
+      <label for="tema" class="form-label">Tema</label>
+      <select class="form-select" id="tema" required>
+        <option value="">Elige un tema...</option>
+        <option value="01">Matemáticas 1 (Secundaria)</option>
+        <option value="02">Matemáticas 2 (Secundaria)</option>
+        <option value="03">Matemáticas 3 (Secundaria)</option>
+        <option value="04">Álgebra (Bachillerato)</option>
+        <option value="05">Trigonometría (Bachillerato)</option>
+        <option value="06">Geometría Analítica (Bachillerato)</option>
+        <option value="07">Cálculo Diferencial (Bachillerato)</option>
+        <option value="08">Cálculo Integral (Bachillerato)</option>
+        <option value="09">Probabilidad y Estadística (Bachillerato)</option>
+        <option value="10">Química Inorgánica (Bachillerato)</option>
+        <option value="11">Química Orgánica (Bachillerato)</option>
+        <option value="12">Física (Bachillerato)</option>
+        <option value="13">Inglés (Secundaria)</option>
+        <option value="14">Inglés (Bachillerato)</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="numEstudiantes" class="form-label">Número de estudiantes</label>
+      <select class="form-select" id="numEstudiantes" required onchange="mostrarCamposWhatsApp()">
+        <option value="">Elige cantidad...</option>
+        <option value="1">1 estudiante</option>
+        <option value="2">2 estudiantes</option>
+        <option value="3">3 estudiantes</option>
+        <option value="4">4 estudiantes</option>
+        <option value="5">5 estudiantes</option>
+      </select>
+    </div>
+
+    <div id="camposWhatsApp"></div>
+
+    <button type="submit" class="btn btn-primary w-100 mt-3">Continuar</button>
+  </form>
+
+  <script>
+    function mostrarCamposWhatsApp() {
+      const cantidad = parseInt(document.getElementById("numEstudiantes").value);
+      const container = document.getElementById("camposWhatsApp");
+      container.innerHTML = "";
+
+      for (let i = 1; i <= cantidad; i++) {
+        const div = document.createElement("div");
+        div.className = "mb-3";
+        div.innerHTML = `
+          <label for="whatsapp${i}" class="form-label">WhatsApp del estudiante ${i}</label>
+          <input type="tel" class="form-control" id="whatsapp${i}" required />
+        `;
+        container.appendChild(div);
+      }
+    }
+  </script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("formSeleccionTema");
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const tema = document.getElementById("tema").value;
+        const numEstudiantes = parseInt(document.getElementById("numEstudiantes").value);
+        const whatsapps = [];
+
+        for (let i = 1; i <= numEstudiantes; i++) {
+          const campo = document.getElementById(`whatsapp${i}`);
+          if (campo && campo.value.trim()) {
+            whatsapps.push(campo.value.trim());
+          } else {
+            alert(`Falta el número de WhatsApp del estudiante ${i}`);
+            return;
+          }
+        }
+
+        const tipoServicio = localStorage.getItem("c2nTipoServicio");
+
+        if (!tipoServicio) {
+          alert("Error: tipo de servicio no definido.");
+          return;
+        }
+
+        const seleccion = {
+          tema,
+          numEstudiantes,
+          whatsapps,
+          tipoServicio
+        };
+
+        localStorage.setItem("c2nSeleccion", JSON.stringify(seleccion));
+
+        if (tipoServicio === "inmediata") {
+          window.location.href = "pago.html";
+        } else if (tipoServicio === "agenda") {
+          window.location.href = "calendario.html";
+        } else {
+          alert("Tipo de servicio desconocido.");
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

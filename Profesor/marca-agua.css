@@ -1,0 +1,15 @@
+/* marca-agua.css */
+body::before {
+  content: "";
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 400px;
+  height: 400px;
+  background: url('logo-c2n.png') no-repeat center center;
+  background-size: contain;
+  opacity: 0.05;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  pointer-events: none;
+}

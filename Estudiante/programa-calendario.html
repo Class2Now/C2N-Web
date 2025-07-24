@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>C2N - Programa tu clase</title>
+<style>
+    body { font-family: Arial, sans-serif; background:#f9fafb; padding: 20px; max-width: 400px; margin: auto;}
+    h1 { text-align: center; margin-bottom: 25px; }
+    label { display: block; margin-top: 15px; }
+    input[type="date"], input[type="time"] { width: 100%; padding: 8px; margin-top: 5px; }
+    button { margin-top: 25px; width: 100%; padding: 12px; background: #0077cc; border: none; color: white; font-size: 1.1em; border-radius: 6px; cursor: pointer;}
+    button:hover { background: #005fa3; }
+    .error { color: red; margin-top: 12px; font-size: 0.95em; }
+</style>
+</head>
+<body>
+    <h1>Programa tu clase</h1>
+    <form id="programaForm">
+        <label for="fecha">Selecciona el día:</label>
+        <input type="date" id="fecha" required min="" />
+        
+        <label for="hora">Selecciona la hora:</label>
+        <input type="time" id="hora" required />
+        
+        <div class="error" id="errorMsg"></div>
+        
+        <button type="submit">Continuar al pago</button>
+    </form>
+
+<script>
+    // Limitar fecha mínima a hoy
+    const fechaInput = document.getElementById('fecha');
+    const today = new Date().toISOString().split('T')[0];
+    fechaInput.min = today;
+
+    document.getElementById('programaForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const errorMsg = document.getElementById('errorMsg');
+        errorMsg.textContent = '';
+
+        const fecha = fechaInput.value;
+        const hora = document.getElementById('hora').value;
+
+        if (!fecha) {
+            errorMsg.textContent = 'Por favor selecciona una fecha válida.';
+            return;
+        }
+        if (!hora) {
+            errorMsg.textContent = 'Por favor selecciona una hora válida.';
+            return;
+        }
+
+        // Guardar fecha y hora en localStorage
+        let seleccion = JSON.parse(localStorage.getItem('c2nSeleccion') || '{}');
+        seleccion.fecha = fecha;
+        seleccion.hora = hora;
+        localStorage.setItem('c2nSeleccion', JSON.stringify(seleccion));
+
+        // Redirigir a pago
+        window.location.href = 'pago.html';
+    });
+</script>
+</body>
+</html>

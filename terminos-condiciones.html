@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Términos y Condiciones - C2N</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f9ff;
+      padding: 20px;
+      color: #003366;
+      max-width: 700px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      color: #004aad;
+      margin-bottom: 20px;
+    }
+    .terminos {
+      height: 400px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+    }
+    .boton {
+      display: block;
+      margin: 30px auto 0;
+      background-color: #004aad;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 1em;
+      border-radius: 6px;
+      cursor: pointer;
+      opacity: 0.6;
+    }
+    .boton.habilitado {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Términos y Condiciones de C2N</h1>
+
+  <div class="terminos" id="terminosTexto">
+    <p><strong>1. Aceptación de los términos:</strong> Al registrarte en C2N, aceptas plenamente y sin reservas los presentes términos y condiciones.</p>
+    <p><strong>2. Uso de la plataforma:</strong> C2N es una herramienta para conectar estudiantes con profesores mediante videollamadas o clases programadas. Queda prohibido el uso indebido del sistema.</p>
+    <p><strong>3. Verificación por WhatsApp:</strong> Todo usuario deberá ser verificado mediante WhatsApp antes de acceder a los servicios.</p>
+    <p><strong>4. Datos personales:</strong> Los datos proporcionados serán utilizados exclusivamente para ofrecer el servicio educativo. No serán compartidos con terceros sin tu consentimiento.</p>
+    <p><strong>5. Pagos y recargas:</strong> Los pagos se realizarán según las tarifas establecidas. Las recargas de saldo son personales e intransferibles.</p>
+    <p><strong>6. Conducta esperada:</strong> Se espera respeto mutuo durante las clases. Conductas inapropiadas podrán conllevar la suspensión del servicio.</p>
+    <p><strong>7. Cambios en los términos:</strong> C2N se reserva el derecho de modificar estos términos en cualquier momento. Se notificará a los usuarios registrados.</p>
+    <p><strong>8. Contacto:</strong> Para dudas o aclaraciones, contáctanos vía WhatsApp o al correo soporte@c2n.com.mx.</p>
+    <p><em>Gracias por confiar en C2N.</em></p>
+  </div>
+
+  <button id="botonAceptar" class="boton" disabled>Aceptar y regresar al registro</button>
+
+  <script>
+    const terminosDiv = document.getElementById('terminosTexto');
+    const botonAceptar = document.getElementById('botonAceptar');
+
+    terminosDiv.addEventListener('scroll', () => {
+      const scrollTotal = terminosDiv.scrollHeight - terminosDiv.clientHeight;
+      const scrollActual = terminosDiv.scrollTop;
+      if (scrollActual >= scrollTotal - 10) {
+        botonAceptar.disabled = false;
+        botonAceptar.classList.add('habilitado');
+      }
+    });
+
+    botonAceptar.addEventListener('click', () => {
+      localStorage.setItem('terminosAceptados', 'true');
+      window.location.href = './Estudiante/registro-estudiante.html';
+    });
+  </script>
+
+</body>
+</html>

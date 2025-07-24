@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gracias por tu solicitud - C2N</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e6f0ff;
+      color: #003366;
+      text-align: center;
+      padding: 50px 20px;
+    }
+    .container {
+      background-color: white;
+      border-radius: 10px;
+      max-width: 600px;
+      margin: auto;
+      padding: 40px 30px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #004aad;
+      margin-bottom: 20px;
+    }
+    p {
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+    .numero-solicitud {
+      font-size: 16px;
+      color: #004aad;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    .mensaje-cierre {
+      font-size: 14px;
+      color: #666;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>¡Gracias!</h1>
+    <p>Tu solicitud ha sido registrada exitosamente.</p>
+    <p class="numero-solicitud">Número de solicitud: <span id="numeroSolicitud">---</span></p>
+    <p class="mensaje-cierre">Serás redirigido a la selección de servicio en 7 segundos...</p>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const seleccion = JSON.parse(localStorage.getItem('c2nSeleccion') || '{}');
+      const numero = seleccion.numeroSolicitud || 'No disponible';
+      document.getElementById('numeroSolicitud').textContent = numero;
+
+      setTimeout(() => {
+        window.location.href = 'seleccion-servicio.html';
+      }, 7000); // 7 segundos
+    });
+  </script>
+</body>
+</html>
+<body>

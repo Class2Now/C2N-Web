@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Resumen de Solicitud - C2N</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 650px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f0f7ff;
+      color: #003366;
+    }
+    h1 {
+      text-align: center;
+      color: #004aad;
+      margin-bottom: 30px;
+    }
+    .dato {
+      margin-bottom: 15px;
+      font-size: 1.1em;
+    }
+    button {
+      background-color: #004aad;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 15px 30px;
+      font-size: 1.2em;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 40px;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #00357c;
+    }
+    ul {
+      margin-left: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Resumen de tu Solicitud</h1>
+
+  <div class="dato"><strong>Usuario:</strong> <span id="usuarioNombre"></span></div>
+  <div class="dato"><strong>Tema:</strong> <span id="temaNombre"></span> (<span id="temaNumero"></span>)</div>
+  <div class="dato"><strong>Modalidad:</strong> <span id="modalidad"></span></div>
+  <div class="dato" id="fechaHoraDiv" style="display:none;">
+    <strong>Fecha y hora agendada:</strong> <span id="fechaHora"></span>
+  </div>
+  <div class="dato"><strong>Número de estudiantes:</strong> <span id="numEstudiantes"></span></div>
+  <div class="dato">
+    <strong>WhatsApps de estudiantes:</strong>
+    <ul id="listaWhatsapps"></ul>
+  </div>
+  <div class="dato"><strong>Método de pago:</strong> <span id="metodoPagoTexto"></span></div>
+
+  <button id="btnConfirmar">Confirmar Solicitud</button>
+
+  <script>
+    // Leer datos guardados en localStorage (debes haberlos guardado antes)
+    const usuario = JSON.parse(localStorage.getItem('c2nUsuarioLogueado')) || { name: 'No definido' };
+    const temaSeleccionado = JSON.parse(localStorage.getItem('c2nTemaSeleccion')) || { id: 'No definido', nombre: 'No definido' };
+    const servicio = localStorage.getItem('c2nServicio') || ''; // 'sos' o 'agenda'
+    const numEstudiantes = parseInt(localStorage.getItem('c2nNumEstudiantes')) || 1;
+    const whatsApps = JSON.parse(localStorage.getItem('c2nWhatsApps')) || [];
+    const fechaAgendada = localStorage.getItem('c2nFechaAgendada') || '';
+    const horaAgendada = localStorage.getItem('c2nHoraAgendada') || '';
+    const metodoPago = localStorage.getItem('c2nMetodoPago') || '';
+
+    // Mostrar datos
+    document.getElementById('usuarioNombre').textContent = usuario.name;
+    document.getElementById('temaNombre').textContent = temaSeleccionado.nombre;
+    document.getElementById('temaNumero').textContent = temaSeleccionado.id;
+
+    const modalidadTexto = servicio === 'sos' ? 'Video llamada inmediata' :
+                           servicio === 'agenda' ? 'Agenda tu clase' : 'No definido';
+    document.getElementById('modalidad').textContent = modalidadTexto;
+
+    if (servicio === 'agenda' && fechaAgendada && horaAgendada) {
+      document.getElementById('fechaHoraDiv').style.display = 'block';
+      document.getElementById('fechaHora').textContent = `${fechaAgendada} - ${horaAgendada}`;
+    }
+
+    document.getElementById('numEstudiantes').textContent = numEstudiantes;
+
+    // Mostrar WhatsApps
+    const lista = document.getElementById('listaWhatsapps');
+    lista.innerHTML = '';
+    if (whatsApps.length > 0) {
+      whatsApps.forEach(numero => {
+        const li = document.createElement('li');
+        li.textContent = numero;
+        lista.appendChild(li);
+      });
+    } else {
+      lista.innerHTML = '<li>No hay números registrados.</li>';
+    }
+
+    // Mostrar texto legible para método de pago
+    let metodoPagoTexto = '';
+    switch (metodoPago) {
+      case 'P1': metodoPagoTexto = 'Prepago $500'; break;
+      case 'P2': metodoPagoTexto = 'Prepago $1000'; break;
+      case 'P3': metodoPagoTexto = 'Prepago $1500'; break;
+      case 'T': metodoPagoTexto = 'Transferencia'; break;
+      case 'E': metodoPagoTexto = 'Efectivo'; break;
+      default: metodoPagoTexto = 'No definido';
+    }
+    document.getElementById('metodoPagoTexto').textContent = metodoPagoTexto;
+
+    // Función para generar número de solicitud (puedes ajustar a tu formato)
+    function generarNumeroSolicitud() {
+      const fecha = new Date();
+      const yyyy = fecha.getFullYear().toString().slice(-2);
+      const mm = (fecha.getMonth()+1).toString().padStart(2, '0');
+      const dd = fecha.getDate().toString().padStart(2, '0');
+      const hh = fecha.getHours().toString().padStart(2, '0');
+      const min = fecha.getMinutes().toString().padStart(2, '0');
+      const servicioCodigo = servicio === 'sos' ? 'V' : servicio === 'agenda' ? 'AC' : 'X';
+      return `${usuario.name.slice(0,2).toUpperCase()}${dd}${mm}${yyyy}${hh}${min}-${servicioCodigo}${numEstudiantes}-${metodoPago}`;
+    }
+
+    // Botón Confirmar
+    document.getElementById('btnConfirmar').addEventListener('click', () => {
+      // Generar número solicitud
+      const numeroSolicitud = generarNumeroSolicitud();
+
+      // Armar objeto para localStorage c2nSeleccion
+      const seleccion = {
+        usuario,
+        tema: temaSeleccionado,
+        modalidad: servicio === 'sos' ? 'V' : servicio === 'agenda' ? 'AC' : '',
+        fechaAgendada: fechaAgendada,
+        horaAgendada: horaAgendada,
+        numEstudiantes,
+        whatsapps: whatsApps,
+        numeroSolicitud,
+        metodoPago
+      };
+
+      // Guardar en localStorage para confirmación
+      localStorage.setItem('c2nSeleccion', JSON.stringify(seleccion));
+
+      // Ir a página de confirmación
+      window.location.href = 'confirmar-solicitud.html';
+    });
+  </script>
+
+</body>
+</html>

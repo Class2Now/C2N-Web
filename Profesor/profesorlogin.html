@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login Profesor - C2N</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #eef2ff;
+      padding: 20px;
+      max-width: 400px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      color: #1e3a8a;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      font-size: 1em;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 20px;
+      background-color: #1e3a8a;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1em;
+      cursor: pointer;
+      width: 100%;
+    }
+    .error {
+      color: red;
+      margin-top: 10px;
+      font-size: 0.9em;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Ingreso Profesor</h1>
+
+  <form id="loginForm">
+    <label>Correo electrónico</label>
+    <input type="email" id="email" required />
+
+    <label>Contraseña</label>
+    <input type="password" id="password" required />
+
+    <p class="error" id="errorMsg"></p>
+
+    <button type="submit">Entrar</button>
+  </form>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+  <script>
+    // Configura tu Firebase aquí (igual que en el registro)
+    const firebaseConfig = {
+      apiKey: "AIzaSyCxg4IY_yj89S7drl6pJAF4qcmZlu-bMK4",
+      authDomain: "class2now.firebaseapp.com",
+      projectId: "class2now",
+      storageBucket: "class2now.appspot.com",
+      messagingSenderId: "882381794790",
+      appId: "1:882381794790:web:a013eff4bc4701522dba27",
+      measurementId: "G-VMCL8BFLZX"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    const loginForm = document.getElementById('loginForm');
+    const errorMsg = document.getElementById('errorMsg');
+
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      errorMsg.textContent = '';
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      auth.signInWithEmailAndPassword(email, password)
+        .then(userCredential => {
+          // Login exitoso
+          localStorage.setItem('c2nProfesorActivo', JSON.stringify({ email }));
+          window.location.href = 'profesorindex.html'; // Cambia a la página del panel profesor
+        })
+        .catch(error => {
+          errorMsg.textContent = error.message;
+        });
+    });
+  </script>
+</body>
+</html>

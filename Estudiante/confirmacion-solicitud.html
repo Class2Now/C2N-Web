@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Confirmación de Solicitud - C2N</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e6f0ff;
+      color: #003366;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .container {
+      background-color: white;
+      border-radius: 10px;
+      max-width: 600px;
+      margin: auto;
+      padding: 40px 30px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .logo-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .logo-container img {
+      max-width: 160px;
+      height: auto;
+    }
+    h1 {
+      color: #004aad;
+      margin-bottom: 10px;
+    }
+    .info {
+      text-align: left;
+      margin: 20px auto;
+    }
+    .info p {
+      margin: 8px 0;
+    }
+    .numero-solicitud {
+      font-size: 14px;
+      color: #555;
+      margin-top: 10px;
+    }
+    .btn {
+      padding: 12px 20px;
+      margin: 10px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .btn-confirmar {
+      background-color: #004aad;
+      color: white;
+    }
+    .btn-cancelar {
+      background-color: #cc0000;
+      color: white;
+    }
+    #contador {
+      font-weight: bold;
+      font-size: 18px;
+      margin-top: 10px;
+      color: #cc0000;
+    }
+    #mensajeTiempo {
+      margin-top: 15px;
+      font-size: 16px;
+      color: #003366;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo-container">
+      <img src="../assets/logo-c2n.png" alt="Logotipo C2N">
+    </div>
+
+    <h1>Confirmación de Solicitud</h1>
+
+    <p id="mensajeTiempo">Tienes 3 minutos para confirmar tu solicitud. Puedes hacerlo en cualquier momento.</p>
+    <div id="contador">03:00</div>
+
+    <div class="info">
+      <p><strong>Nombre:</strong> <span id="nombreUsuario">---</span></p>
+      <p><strong>Tema:</strong> <span id="tema">---</span></p>
+      <p><strong>Hora:</strong> <span id="hora">---</span></p>
+      <p><strong>Duración:</strong> <span id="duracion">---</span></p>
+      <p><strong>Número de estudiantes:</strong> <span id="cantidad">---</span></p>
+      <p><strong>WhatsApp(s):</strong> <span id="whatsapps">---</span></p>
+    </div>
+
+    <p class="numero-solicitud">Número de solicitud: <span id="numeroSolicitud">---</span></p>
+
+    <button class="btn btn-confirmar" onclick="confirmarSolicitud()">Confirmar solicitud</button>
+    <button class="btn btn-cancelar" onclick="cancelarSolicitud()">Cancelar/Modificar la solicitud</button>
+  </div>
+
+  <script>
+    let timeoutId;
+    let countdownInterval;
+    let tiempoRestante = 180;
+
+    function redirigirInactividad() {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        window.location.href = 'seleccion-servicio.html';
+      }, 180000);
+    }
+
+    function iniciarCuentaRegresiva() {
+      const contador = document.getElementById('contador');
+      countdownInterval = setInterval(() => {
+        if (tiempoRestante <= 0) {
+          clearInterval(countdownInterval);
+          return;
+        }
+        tiempoRestante--;
+        const minutos = String(Math.floor(tiempoRestante / 60)).padStart(2, '0');
+        const segundos = String(tiempoRestante % 60).padStart(2, '0');
+        contador.textContent = `${minutos}:${segundos}`;
+      }, 1000);
+    }
+
+    function confirmarSolicitud() {
+      clearTimeout(timeoutId);
+      clearInterval(countdownInterval);
+
+      const seleccion = JSON.parse(localStorage.getItem('c2nSeleccion') || '{}');
+      const estudiante = JSON.parse(localStorage.getItem('c2nEstudianteActivo') || '{}');
+
+      if (!seleccion || !seleccion.numeroSolicitud || !estudiante || !estudiante.numeroControl) {
+        alert("Faltan datos para completar la solicitud.");
+        return;
+      }
+
+      // Crear la nueva solicitud
+      const nuevaSolicitud = {
+        numeroSolicitud: seleccion.numeroSolicitud,
+        numeroControl: estudiante.numeroControl,
+        nombre: estudiante.nombre,
+        tema: seleccion.tema,
+        numEstudiantes: seleccion.numEstudiantes,
+        whatsapps: seleccion.whatsapps,
+        tipoPago: seleccion.tipoPago,
+        tipoServicio: localStorage.getItem("c2nServicio") || "V",
+        fecha: seleccion.fecha || null,
+        hora: seleccion.hora || null
+      };
+
+      // Guardar en localStorage
+      const solicitudes = JSON.parse(localStorage.getItem('c2nSolicitudes') || '[]');
+      solicitudes.push(nuevaSolicitud);
+      localStorage.setItem('c2nSolicitudes', JSON.stringify(solicitudes));
+
+      window.location.href = 'gracias.html';
+    }
+
+    function cancelarSolicitud() {
+      clearTimeout(timeoutId);
+      clearInterval(countdownInterval);
+      const estudiante = JSON.parse(localStorage.getItem('c2nEstudianteActivo') || '{}');
+      if (estudiante && estudiante.numeroControl) {
+        localStorage.setItem('numeroEstudianteActual', estudiante.numeroControl);
+      }
+      window.location.href = 'seleccion-servicio.html';
+    }
+
+    function generarNumeroSolicitud(seleccion, estudiante) {
+      const letraControl = estudiante.numeroControl || 'X00';
+      let tipoServicio = 'V';
+      const servicioGuardado = localStorage.getItem('c2nServicio');
+      if (servicioGuardado === 'agenda') {
+        tipoServicio = 'AC';
+      }
+      const tema = seleccion.tema || '00';
+      const numEst = seleccion.numEstudiantes || '1';
+      const tipoPago = seleccion.tipoPago || 'T';
+      return `${letraControl}-${tipoServicio}-${tema}-${numEst}-${tipoPago}`;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      redirigirInactividad();
+      iniciarCuentaRegresiva();
+
+      const seleccion = JSON.parse(localStorage.getItem('c2nSeleccion') || '{}');
+      const estudiante = JSON.parse(localStorage.getItem('c2nEstudianteActivo') || '{}');
+      const pago = localStorage.getItem('pagoRealizado') || '';
+      const whatsapps = seleccion.whatsapps || [];
+
+      document.getElementById('nombreUsuario').textContent = estudiante.nombre || 'Sin nombre';
+      document.getElementById('tema').textContent = seleccion.tema || 'No especificado';
+
+      if (seleccion.fecha && seleccion.hora) {
+        document.getElementById('hora').textContent = `Fecha: ${seleccion.fecha}, Hora: ${seleccion.hora}`;
+      } else {
+        document.getElementById('hora').textContent = 'Inmediato';
+      }
+
+      let duracion = 'Máximo 1 hora';
+      if (pago === 'true' && seleccion.tipoPago && ['P2', 'P3'].includes(seleccion.tipoPago)) {
+        duracion = 'Clase por minutos';
+      }
+      document.getElementById('duracion').textContent = duracion;
+
+      document.getElementById('cantidad').textContent = seleccion.numEstudiantes || 'No especificado';
+      document.getElementById('whatsapps').textContent = whatsapps.length > 0 ? whatsapps.join(', ') : 'No registrados';
+
+      if (!seleccion.numeroSolicitud) {
+        const nuevoNumero = generarNumeroSolicitud(seleccion, estudiante);
+        seleccion.numeroSolicitud = nuevoNumero;
+        localStorage.setItem('c2nSeleccion', JSON.stringify(seleccion));
+      }
+
+      document.getElementById('numeroSolicitud').textContent = seleccion.numeroSolicitud;
+    });
+
+    ['click', 'mousemove', 'keydown'].forEach(evt => {
+      document.addEventListener(evt, redirigirInactividad);
+    });
+  </script>
+</body>
+</html>

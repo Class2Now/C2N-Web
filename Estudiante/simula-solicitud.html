@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Simular solicitud de clase</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 400px; margin: auto; padding: 20px; background: #eef2ff; }
+  label { display: block; margin-top: 15px; font-weight: bold; }
+  select, input, button { width: 100%; padding: 8px; margin-top: 5px; font-size: 1em; }
+  button { background-color: #1e3a8a; color: white; border: none; border-radius: 6px; cursor: pointer; margin-top: 20px; }
+  button:hover { background-color: #163269; }
+  .mensaje { margin-top: 15px; font-style: italic; color: green; }
+</style>
+</head>
+<body>
+
+<h1>Simular solicitud de clase</h1>
+
+<form id="formSolicitud">
+  <label for="tema">Tema</label>
+  <select id="tema" required>
+    <option value="">--Selecciona un tema--</option>
+    <option>Matemáticas (2 Secundaria)</option>
+    <option>Álgebra (Bachillerato)</option>
+    <option>Inglés (Secundaria)</option>
+  </select>
+
+  <label for="numeroEstudiantes">Número de estudiantes</label>
+  <input type="number" id="numeroEstudiantes" min="1" max="5" value="1" required />
+
+  <label for="fecha">Fecha</label>
+  <input type="date" id="fecha" required />
+
+  <label for="hora">Hora</label>
+  <input type="time" id="hora" required />
+
+  <label for="nombre">Nombre solicitante</label>
+  <input type="text" id="nombre" required />
+
+  <label for="whatsapp">WhatsApp(s) (separa números con comas)</label>
+  <input type="text" id="whatsapp" placeholder="5512345678,5598765432" required />
+
+  <label for="tipoServicio">Tipo de servicio</label>
+  <select id="tipoServicio" required>
+    <option value="">--Selecciona--</option>
+    <option value="Videollamada">Videollamada</option>
+    <option value="Agenda">Agenda tu clase</option>
+  </select>
+
+  <button type="submit">Enviar solicitud</button>
+</form>
+
+<p class="mensaje" id="mensaje"></p>
+
+<script>
+  document.getElementById('formSolicitud').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const tema = document.getElementById('tema').value;
+    const numeroEstudiantes = parseInt(document.getElementById('numeroEstudiantes').value, 10);
+    const fecha = document.getElementById('fecha').value;
+    const hora = document.getElementById('hora').value;
+    const nombre = document.getElementById('nombre').value.trim();
+    const whatsappText = document.getElementById('whatsapp').value.trim();
+    const tipoServicio = document.getElementById('tipoServicio').value;
+
+    if (!tema || !fecha || !hora || !nombre || !whatsappText || !tipoServicio) {
+      alert('Por favor completa todos los campos.');
+      return;
+    }
+
+    const whatsapps = whatsappText.split(',').map(w => w.trim()).filter(w => w.length > 0);
+
+    // Crear id simple y único (timestamp + aleatorio)
+    const id = 'S-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+
+    let solicitudes = JSON.parse(localStorage.getItem('c2nSolicitudes') || '[]');
+
+    const nuevaSolicitud = {
+      id,
+      tema,
+      fecha,
+      hora,
+      numeroEstudiantes,
+      whatsapps,
+      nombre,
+      estado: 'pendiente',
+      asignadoA: null,
+      tipoServicio
+    };
+
+    solicitudes.push(nuevaSolicitud);
+    localStorage.setItem('c2nSolicitudes', JSON.stringify(solicitudes));
+
+    document.getElementById('mensaje').textContent = 'Solicitud enviada con éxito. ¡Gracias!';
+
+    // Reset formulario
+    this.reset();
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Generar Número de Solicitud</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+</head>
+<body class="bg-light">
+
+  <div class="container mt-5">
+    <div class="card shadow p-4">
+      <h2 class="mb-4">Número de Solicitud</h2>
+
+      <p>Tu número de solicitud generado es:</p>
+      <h3 id="numeroSolicitud" class="text-primary"></h3>
+
+      <p><strong>Número de control:</strong> <span id="numeroControl">---</span></p>
+      <p><strong>Tema:</strong> <span id="tema">---</span></p>
+      <p><strong>Modalidad:</strong> <span id="modalidad">---</span></p>
+      <p><strong>Cantidad de estudiantes:</strong> <span id="cantidad">---</span></p>
+      <p><strong>Total a pagar:</strong> <span id="totalPagar">$0</span></p>
+      <p><strong>Método de pago:</strong> <span id="metodoPago">---</span></p>
+
+      <p><strong>WhatsApps de estudiantes:</strong></p>
+      <ul id="listaWhatsapps"></ul>
+
+      <p><strong>Tiempo para confirmar: </strong><span id="cuentaRegresiva">02:00</span></p>
+
+      <div class="d-flex justify-content-between mt-4">
+        <button id="btnCancelar" class="btn btn-danger">Cancelar</button>
+        <button id="btnConfirmar" class="btn btn-primary">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="generar-numero-solicitud.js"></script>
+</body>
+</html>

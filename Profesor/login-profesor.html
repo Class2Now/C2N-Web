@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Iniciar Sesión - Profesor C2N</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef2ff;
+      background-image: url('assets/logo-c2N.png');
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 400px;
+    }
+
+    .container {
+      background-color: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      max-width: 500px;
+      margin: 80px auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    h2 {
+      color: #004aad;
+      text-align: center;
+      margin-bottom: 25px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Ingreso Profesor C2N</h2>
+    <form id="loginProfesorForm">
+      <div class="mb-3">
+        <label for="correo" class="form-label">Correo electrónico</label>
+        <input type="email" class="form-control" id="correo" required />
+      </div>
+
+      <div class="mb-3">
+        <label for="contrasena" class="form-label">Contraseña</label>
+        <input type="password" class="form-control" id="contrasena" required />
+      </div>
+
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="verContrasena" />
+        <label class="form-check-label" for="verContrasena">Mostrar contraseña</label>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+    </form>
+  </div>
+
+  <script src="login-profesor.js"></script>
+</body>
+</html>

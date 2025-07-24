@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Selecciona Servicio - C2N</title>
+  <link rel="stylesheet" href="../estilos.css" />
+  <style>
+    body {
+      text-align: center;
+      font-family: Arial, sans-serif;
+      background-color: #eaf0ff;
+      padding: 40px 20px;
+    }
+    h1 {
+      color: #004aad;
+      margin-bottom: 30px;
+    }
+    .btn-service {
+      display: block;
+      width: 80%;
+      max-width: 400px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #004aad;
+      color: white;
+      font-size: 18px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .btn-service:hover {
+      background-color: #003380;
+    }
+    img {
+      max-width: 200px;
+      margin-bottom: 30px;
+    }
+    .notificacion {
+      background: #d1e7ff;
+      border: 2px solid #004aad;
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 30px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .notificacion h3 {
+      margin-top: 0;
+    }
+    .notificacion a {
+      color: #004aad;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <img src="../assets/logo-c2N.png" alt="C2N" />
+  <h1>Selecciona el tipo de servicio</h1>
+  <button id="videoLlamadaBtn" class="btn-service">📞 Video llamada inmediata</button>
+  <button id="agendaClaseBtn" class="btn-service">📅 Agenda tu clase</button>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const estudianteActivo = localStorage.getItem("c2nEstudianteActivo");
+      if (!estudianteActivo) {
+        window.location.href = "login-estudiante.html";
+        return;
+      }
+
+      const videoBtn = document.getElementById("videoLlamadaBtn");
+      const agendaBtn = document.getElementById("agendaClaseBtn");
+
+      videoBtn.addEventListener("click", () => {
+        localStorage.setItem("c2nTipoServicio", "inmediata");
+        window.location.href = "seleccion-tema.html";
+      });
+
+      agendaBtn.addEventListener("click", () => {
+        localStorage.setItem("c2nTipoServicio", "agenda");
+        window.location.href = "seleccion-tema.html";
+      });
+
+      // 🔔 Notificación si ya tiene clase asignada
+      const ultimaSolicitud = JSON.parse(localStorage.getItem("c2nUltimaSolicitud") || "null");
+      const clases = JSON.parse(localStorage.getItem("c2nClases") || "[]");
+
+      if (ultimaSolicitud) {
+        const claseAsignada = clases.find(c => c.numeroControl === ultimaSolicitud.id);
+        if (claseAsignada) {
+          const noti = document.createElement("div");
+          noti.className = "notificacion";
+          noti.innerHTML = `
+            <h3>🎉 ¡Tu clase ha sido asignada!</h3>
+            <p><strong>Número de clase:</strong> ${claseAsignada.numeroClase}</p>
+            <p><strong>Tema:</strong> ${claseAsignada.tema}</p>
+            <p><strong>Duración:</strong> ${claseAsignada.duracion.horas}h ${claseAsignada.duracion.minutos}m</p>
+            <p><a href="${claseAsignada.link}" target="_blank">🔗 Unirme a la clase ahora</a></p>
+          `;
+          document.body.appendChild(noti);
+
+          const audio = new Audio("https://notificationsounds.com/notification-sounds/event-538/download/mp3");
+          audio.play().catch(() => {});
+        }
+      }
+    });
+  </script>
+</body>
+</html>

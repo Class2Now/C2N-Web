@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registro Profesor - C2N</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eaf0ff;
+      background-image: url("assets/logo-c2N.png");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 350px;
+      padding: 40px;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.15);
+    }
+
+    h2 {
+      text-align: center;
+      color: #004aad;
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      margin: 12px 0 5px;
+      font-weight: bold;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+    }
+
+    .temas-checkboxes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .temas-checkboxes input[type="checkbox"] {
+      display: none;
+    }
+
+    .temas-checkboxes label {
+      background-color: #e6f0ff;
+      border: 2px solid #004aad;
+      color: #004aad;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .temas-checkboxes input[type="checkbox"]:checked + label {
+      background-color: #004aad;
+      color: white;
+    }
+
+    .btn {
+      background-color: #004aad;
+      color: white;
+      padding: 12px 20px;
+      font-size: 1em;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .btn:hover {
+      background-color: #003080;
+    }
+
+    .terminos {
+      font-size: 0.9em;
+      margin-top: 10px;
+    }
+
+    .terminos a {
+      color: #004aad;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    .terminos a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Registro de Profesor</h2>
+    <form id="registroProfesorForm">
+      <label for="nombre">Nombre completo:</label>
+      <input type="text" id="nombre" required>
+
+      <label for="edad">Edad:</label>
+      <input type="number" id="edad" required min="18" max="99">
+
+      <label for="email">Correo electrónico:</label>
+      <input type="email" id="email" required>
+
+      <label for="whatsapp">Número de WhatsApp:</label>
+      <input type="tel" id="whatsapp" required>
+
+      <label for="password">Contraseña:</label>
+      <input type="password" id="password" required>
+
+      <label>Materias que puedes impartir:</label>
+      <div class="temas-checkboxes" id="contenedorTemas"></div>
+
+      <div class="terminos">
+        <input type="checkbox" id="acepto" required />
+        He leído y acepto los <a href="terminos-condiciones.html" target="_blank">Términos y Condiciones</a>
+      </div>
+
+      <button type="submit" class="btn">Registrarme</button>
+    </form>
+  </div>
+
+  <script>
+    const listaTemas = [
+      "Matemáticas 1 (Secundaria)",
+      "Matemáticas 2 (Secundaria)",
+      "Matemáticas 3 (Secundaria)",
+      "Álgebra (Bachillerato)",
+      "Trigonometría (Bachillerato)",
+      "Geometría Analítica (Bachillerato)",
+      "Cálculo Diferencial (Bachillerato)",
+      "Cálculo Integral (Bachillerato)",
+      "Probabilidad y Estadística (Bachillerato)",
+      "Química Inorgánica (Bachillerato)",
+      "Química Orgánica (Bachillerato)",
+      "Física (Bachillerato)",
+      "Inglés (Secundaria)",
+      "Inglés (Bachillerato)"
+    ];
+
+    const contenedorTemas = document.getElementById("contenedorTemas");
+
+    listaTemas.forEach((tema, index) => {
+      const checkbox = document.createElement("input");
+      const label = document.createElement("label");
+      const id = `tema${index}`;
+
+      checkbox.type = "checkbox";
+      checkbox.value = tema;
+      checkbox.id = id;
+      checkbox.name = "temas";
+
+      label.htmlFor = id;
+      label.textContent = tema;
+
+      contenedorTemas.appendChild(checkbox);
+      contenedorTemas.appendChild(label);
+    });
+
+    const form = document.getElementById("registroProfesorForm");
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const nombre = document.getElementById("nombre").value.trim();
+      const edad = document.getElementById("edad").value;
+      const correo = document.getElementById("email").value.trim();
+      const whatsapp = document.getElementById("whatsapp").value.trim();
+      const contrasena = document.getElementById("password").value.trim();
+      const acepta = document.getElementById("acepto").checked;
+
+      const regexContrasena = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+      if (!regexContrasena.test(contrasena)) {
+        alert("La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.");
+        return;
+      }
+
+      if (!acepta) {
+        alert("Debes aceptar los Términos y Condiciones.");
+        return;
+      }
+
+      const materias = [];
+      document.querySelectorAll('input[name="temas"]:checked').forEach(cb => {
+        materias.push(cb.value);
+      });
+
+      if (materias.length === 0) {
+        alert("Debes seleccionar al menos una materia.");
+        return;
+      }
+
+      const nuevoProfesor = {
+        nombre,
+        edad,
+        correo,
+        whatsapp,
+        contrasena,
+        materias,
+        fechaRegistro: new Date().toISOString().split("T")[0],
+        numeroRegistro: generarNumeroRegistro()
+      };
+
+      const profesores = JSON.parse(localStorage.getItem("c2nProfesores") || "[]");
+      profesores.push(nuevoProfesor);
+      localStorage.setItem("c2nProfesores", JSON.stringify(profesores));
+
+      alert("¡Registro exitoso! Ahora puedes iniciar sesión.");
+      window.location.href = "login-profesor.html";
+    });
+
+    function generarNumeroRegistro() {
+      const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      let registro = localStorage.getItem("c2nUltimoRegistroProfesor") || "A00";
+
+      let letra = registro[0];
+      let numero = parseInt(registro.slice(1)) + 1;
+
+      if (numero > 99) {
+        letra = letras[letras.indexOf(letra) + 1] || "A";
+        numero = 1;
+      }
+
+      const nuevo = letra + String(numero).padStart(2, "0");
+      localStorage.setItem("c2nUltimoRegistroProfesor", nuevo);
+      return nuevo;
+    }
+  </script>
+</body>
+</html>

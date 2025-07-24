@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mis Clases Aceptadas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef3ff;
+      padding: 40px;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: #004aad;
+      margin-bottom: 30px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+
+    th {
+      background-color: #004aad;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    a {
+      color: #004aad;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Mis Clases Aceptadas</h1>
+  <div id="contenedorClases"></div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const profesor = JSON.parse(localStorage.getItem("c2nProfesorActivo") || "null");
+      if (!profesor || !profesor.email) {
+        alert("No has iniciado sesión.");
+        window.location.href = "login-profesor.html";
+        return;
+      }
+
+      const clases = JSON.parse(localStorage.getItem("c2nClases") || "[]");
+      const misClases = clases.filter(c => c.emailProfesor === profesor.email);
+
+      const contenedor = document.getElementById("contenedorClases");
+      if (misClases.length === 0) {
+        contenedor.innerHTML = "<p>No has aceptado ninguna clase aún.</p>";
+        return;
+      }
+
+      let tabla = `
+        <table>
+          <thead>
+            <tr>
+              <th>Número de clase</th>
+              <th>Tema</th>
+              <th>Fecha</th>
+              <th>Hora</th>
+              <th>Duración</th>
+              <th>Link Jitsi</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      misClases.forEach(clase => {
+        tabla += `
+          <tr>
+            <td>${clase.numeroClase}</td>
+            <td>${clase.tema}</td>
+            <td>${clase.fechaClase}</td>
+            <td>${clase.horaClase}</td>
+            <td>${clase.duracion.horas}h ${clase.duracion.minutos}m</td>
+            <td><a href="${clase.link}" target="_blank">Entrar</a></td>
+          </tr>
+        `;
+      });
+
+      tabla += "</tbody></table>";
+      contenedor.innerHTML = tabla;
+    });
+  </script>
+
+</body>
+</html>

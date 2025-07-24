@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Panel del Estudiante - C2N</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef4ff;
+      color: #003366;
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+      position: relative;
+    }
+
+    h1 {
+      text-align: center;
+      color: #004aad;
+      margin-bottom: 30px;
+    }
+
+    .info-estudiante {
+      margin-bottom: 30px;
+      padding: 15px;
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-estudiante p {
+      margin: 5px 0;
+      font-size: 1.1em;
+    }
+
+    .info-estudiante .fecha {
+      font-size: 0.9em;
+      color: #666;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #ffffff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #ccc;
+    }
+
+    th {
+      background-color: #004aad;
+      color: white;
+    }
+
+    .saldo {
+      font-weight: bold;
+      color: green;
+    }
+
+    .volver {
+      display: block;
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .volver a {
+      color: #004aad;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .volver a:hover {
+      text-decoration: underline;
+    }
+
+    .cerrar-sesion {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+
+    .cerrar-sesion button {
+      background-color: #d9534f;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 0.9em;
+      cursor: pointer;
+    }
+
+    .cerrar-sesion button:hover {
+      background-color: #c9302c;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Botón Cerrar sesión -->
+  <div class="cerrar-sesion">
+    <button onclick="cerrarSesion()">Cerrar sesión</button>
+  </div>
+
+  <h1>Panel del Estudiante</h1>
+
+  <div class="info-estudiante" id="infoEstudiante">
+    <!-- Datos del estudiante se insertan vía JS -->
+  </div>
+
+  <table id="tablaClases">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Código de Clase</th>
+        <th>Saldo Prepago</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Filas se insertan vía JS -->
+    </tbody>
+  </table>
+
+  <div class="volver">
+    <a href="seleccion-servicio.html">← Volver a clases</a>
+  </div>
+
+  <script>
+    function cerrarSesion() {
+      localStorage.removeItem("c2nEstudiante");
+      window.location.href = "login-estudiante.html";
+    }
+
+    const estudiante = JSON.parse(localStorage.getItem('c2nEstudiante') || '{}');
+    const clases = JSON.parse(localStorage.getItem('c2nClases') || '[]');
+    const infoDiv = document.getElementById('infoEstudiante');
+    const tbody = document.querySelector('#tablaClases tbody');
+
+    if (!estudiante.nombre) {
+      infoDiv.innerHTML = "<p><strong>Error:</strong> No se encontró un estudiante registrado.</p>";
+    } else {
+      infoDiv.innerHTML = `
+        <p><strong>Nombre:</strong> ${estudiante.nombre}</p>
+        <p><strong>WhatsApp:</strong> ${estudiante.whatsapp}</p>
+        <p class="fecha"><strong>Fecha de registro:</strong> ${estudiante.fechaRegistro || "No disponible"}</p>
+      `;
+
+      if (clases.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='3'>No hay clases registradas todavía.</td></tr>";
+      } else {
+        clases.forEach((clase, i) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${i + 1}</td>
+            <td>${clase.codigoClase}</td>
+            <td class="saldo">$${clase.saldo || "0.00"}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+    }
+  </script>
+</body>
+</html>

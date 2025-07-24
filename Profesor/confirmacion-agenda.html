@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Confirmación - Agenda tu clase</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef2ff;
+      text-align: center;
+      padding: 50px 20px;
+      background-image: url('assets/logo-c2N.png');
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 400px;
+    }
+
+    .container {
+      background-color: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+      max-width: 600px;
+      margin: auto;
+    }
+
+    h2 {
+      color: #004aad;
+    }
+
+    .mensaje {
+      margin-top: 20px;
+      font-size: 1.1em;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Tu clase ha sido agendada</h2>
+    <p class="mensaje">Estamos notificando a los profesores disponibles.<br>
+    En breve, uno de ellos te confirmará la clase.</p>
+  </div>
+
+  <script>
+    const estudiante = JSON.parse(localStorage.getItem("c2nEstudianteActivo"));
+    const seleccion = JSON.parse(localStorage.getItem("c2nSeleccion"));
+    const pago = JSON.parse(localStorage.getItem("c2nPago"));
+    const profesores = JSON.parse(localStorage.getItem("c2nProfesores") || "[]");
+
+    if (!estudiante || !seleccion || !pago) {
+      alert("Datos incompletos. No se puede registrar la solicitud.");
+      window.location.href = "seleccion-servicio.html";
+    }
+
+    // Generar ID de solicitud
+    const id = `${estudiante.numeroControl}-A${seleccion.numeroEstudiantes}-${seleccion.temaID}-${pago.tipo}`;
+
+    const nuevaSolicitud = {
+      id,
+      tipo: "agenda",
+      nombre: estudiante.nombre,
+      numeroEstudiante: estudiante.numeroControl,
+      temaID: seleccion.temaID,
+      tema: seleccion.temaNombre,
+      numeroEstudiantes: seleccion.numeroEstudiantes,
+      whatsapps: seleccion.whatsapps || [estudiante.whatsapp],
+      fecha: seleccion.fecha,
+      hora: seleccion.hora,
+      estado: "pendiente",
+      asignadoA: null,
+      link: null
+    };
+
+    const solicitudes = JSON.parse(localStorage.getItem("c2nSolicitudes") || "[]");
+    solicitudes.push(nuevaSolicitud);
+    localStorage.setItem("c2nSolicitudes", JSON.stringify(solicitudes));
+
+    // Buscar profesores que impartan el tema
+    const destinatarios = profesores.filter(p => p.materias.includes(seleccion.temaNombre));
+
+    if (destinatarios.length > 0) {
+      const mensaje = `📚 Nueva clase agendada\n` +
+        `Tema: ${seleccion.temaNombre}\n` +
+        `Fecha: ${seleccion.fecha} a las ${seleccion.hora}\n` +
+        `Estudiantes: ${seleccion.numeroEstudiantes}\n` +
+        `Solicitud: ${id}\n\n` +
+        `¿Puedes tomarla? Confirma en tu panel o responde este mensaje.`;
+
+      const numeroWhats = destinatarios[0].whatsapp.replace(/\D/g, ""); // solo números
+
+      const linkWA = `https://wa.me/52${numeroWhats}?text=${encodeURIComponent(mensaje)}`;
+
+      setTimeout(() => {
+        window.open(linkWA, "_blank");
+      }, 1500);
+    }
+  </script>
+</body>
+</html>

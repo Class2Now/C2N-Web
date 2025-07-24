@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>C2N - Selección de Perfil</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #e0f0ff;
+      color: #003366;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 40px;
+      color: #004aad;
+      text-align: center;
+    }
+
+    .botones-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .btn-perfil {
+      background: #004aad;
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      font-size: 1.2em;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      width: 250px;
+      text-align: center;
+    }
+
+    .btn-perfil:hover {
+      background: #00357c;
+    }
+
+    /* Estilos para modo horizontal en móviles */
+    @media (max-width: 768px) and (orientation: landscape) {
+      body {
+        flex-direction: column;
+      }
+
+      .botones-container {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+      }
+
+      .btn-perfil {
+        width: 180px;
+        padding: 12px 20px;
+        font-size: 1em;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>¿Quién eres?</h1>
+
+  <div class="botones-container">
+    <button class="btn-perfil" onclick="location.href='Estudiante/registro-estudiante.html'">Soy Estudiante</button>
+    <button class="btn-perfil" onclick="location.href='Profesor/registro-profesor.html'">Soy Profesor</button>
+    <button class="btn-perfil" onclick="location.href='Gestor/Gestor-gestorindex.html'">Soy Gestor</button>
+  </div>
+
+</body>
+</html>

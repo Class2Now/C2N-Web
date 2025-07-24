@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>C2N - Calendario y Horarios</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #e8f2ff;
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+      color: #003366;
+      position: relative;
+    }
+    h1 {
+      text-align: center;
+      color: #004a99;
+    }
+    label {
+      font-weight: bold;
+      margin-top: 20px;
+      display: block;
+      font-size: 1.1em;
+    }
+    input[type="date"] {
+      padding: 10px;
+      font-size: 1em;
+      width: 100%;
+      box-sizing: border-box;
+      border-radius: 6px;
+      border: 1px solid #004a99;
+      margin-top: 8px;
+      color: #003366;
+    }
+    #horasDisponibles {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .horaBtn {
+      background-color: #0073e6;
+      color: white;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+      flex: 1 1 30%;
+      text-align: center;
+    }
+    .horaBtn:hover {
+      background-color: #005bb5;
+    }
+    .horaBtn.selected {
+      background-color: #003d80;
+    }
+    #btnConfirmar {
+      margin-top: 30px;
+      background-color: #0057b8;
+      color: white;
+      border: none;
+      padding: 15px;
+      font-size: 1.1em;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      font-weight: bold;
+      opacity: 0.6;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    #btnConfirmar.enabled {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    #infoSeleccion {
+      margin-top: 15px;
+      font-size: 1em;
+      font-weight: bold;
+      color: #003366;
+      min-height: 24px;
+    }
+    .logo-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .logo-container img {
+      max-width: 180px;
+      height: auto;
+    }
+    #panelBtn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 0.85em;
+      padding: 6px 12px;
+      border-radius: 6px;
+      background-color: #004aad;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    #panelBtn:hover {
+      background-color: #00357c;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BOTÓN PANEL -->
+  <button id="panelBtn" onclick="window.location.href='panel-estudiante.html'">Panel del Estudiante</button>
+
+  <!-- LOGOTIPO -->
+  <div class="logo-container">
+    <img src="../assets/logo-c2n.png" alt="Logotipo C2N" />
+  </div>
+
+  <h1>Selecciona fecha y hora</h1>
+
+  <form id="calendarioForm">
+
+    <label for="fechaSelect">Fecha</label>
+    <input type="date" id="fechaSelect" required min="" />
+
+    <label>Horas disponibles (6:00 a 21:00)</label>
+    <div id="horasDisponibles"></div>
+
+    <div id="infoSeleccion"></div>
+
+    <button type="submit" id="btnConfirmar">CONFIRMAR</button>
+  </form>
+
+  <script>
+    const fechaSelect = document.getElementById('fechaSelect');
+    const horasDisponiblesDiv = document.getElementById('horasDisponibles');
+    const btnConfirmar = document.getElementById('btnConfirmar');
+    const infoSeleccion = document.getElementById('infoSeleccion');
+
+    let horaSeleccionada = null;
+    let fechaSeleccionada = null;
+
+    // Leer seleccion previa o crear nueva
+    let seleccion = JSON.parse(localStorage.getItem('c2nSeleccion') || '{}');
+
+    // Establecer mínimo selectable en el input date: mañana
+    const hoy = new Date();
+    hoy.setDate(hoy.getDate() + 1);
+    const yyyy = hoy.getFullYear();
+    const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+    const dd = String(hoy.getDate()).padStart(2, '0');
+    const fechaMin = `${yyyy}-${mm}-${dd}`;
+    fechaSelect.min = fechaMin;
+
+    if (seleccion.fecha) {
+      fechaSeleccionada = seleccion.fecha;
+      fechaSelect.value = fechaSeleccionada;
+    }
+    if (seleccion.hora) {
+      horaSeleccionada = seleccion.hora;
+    }
+
+    function generarHoras() {
+      horasDisponiblesDiv.innerHTML = '';
+      for (let h = 6; h <= 21; h++) {
+        const horaStr = h.toString().padStart(2, '0') + ':00';
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = horaStr;
+        btn.classList.add('horaBtn');
+        if (horaSeleccionada === horaStr) {
+          btn.classList.add('selected');
+        }
+        btn.addEventListener('click', () => {
+          seleccionarHora(btn, horaStr);
+        });
+        horasDisponiblesDiv.appendChild(btn);
+      }
+    }
+
+    function seleccionarHora(btn, hora) {
+      document.querySelectorAll('.horaBtn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      horaSeleccionada = hora;
+      seleccion.hora = horaSeleccionada;
+      localStorage.setItem('c2nSeleccion', JSON.stringify(seleccion));
+      actualizarEstadoConfirmar();
+    }
+
+    function actualizarEstadoConfirmar() {
+      if (fechaSeleccionada && horaSeleccionada) {
+        btnConfirmar.classList.add('enabled');
+        btnConfirmar.disabled = false;
+        infoSeleccion.textContent = `Fecha: ${fechaSeleccionada}, Hora: ${horaSeleccionada}`;
+      } else {
+        btnConfirmar.classList.remove('enabled');
+        btnConfirmar.disabled = true;
+        infoSeleccion.textContent = '';
+      }
+    }
+
+    fechaSelect.addEventListener('change', () => {
+      fechaSeleccionada = fechaSelect.value;
+      seleccion.fecha = fechaSeleccionada;
+      localStorage.setItem('c2nSeleccion', JSON.stringify(seleccion));
+      generarHoras();
+      actualizarEstadoConfirmar();
+    });
+
+    document.getElementById('calendarioForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!fechaSeleccionada || !horaSeleccionada) {
+        alert('Por favor selecciona una fecha y una hora.');
+        return;
+      }
+      window.location.href = 'pago.html';
+    });
+
+    generarHoras();
+    actualizarEstadoConfirmar();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Panel de Pruebas - Profesor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef2ff;
+      padding: 20px;
+      max-width: 960px;
+      margin: auto;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    h1 {
+      color: #333;
+    }
+    .selector {
+      margin-bottom: 1rem;
+    }
+    .cerrar-btn {
+      background-color: #ef4444;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    .disponible-btn {
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .table-container {
+      overflow-x: auto;
+      background: white;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 600px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.75rem;
+      text-align: center;
+    }
+    th {
+      background-color: #2563eb;
+      color: white;
+    }
+    tr:nth-child(even) {
+      background-color: #f1f5f9;
+    }
+    .message {
+      font-weight: bold;
+      margin-bottom: 1rem;
+      color: #2563eb;
+    }
+    .message.error {
+      color: #dc2626;
+    }
+    .estado-no-aceptada {
+      color: #ca8a04;
+      font-weight: bold;
+    }
+    .estado-factura-no-pagada {
+      color: #dc2626;
+      font-weight: bold;
+    }
+    .botonera {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Panel de Pruebas - Profesor</h1>
+    <div class="botonera">
+      <button id="btnDisponible" class="disponible-btn">🟢 Estoy disponible</button>
+      <button class="cerrar-btn" onclick="cerrarSesion()">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <div class="selector">
+    <label for="estadoSimulado">Simular estado: </label>
+    <select id="estadoSimulado">
+      <option value="ok">✅ Normal (OK)</option>
+      <option value="empty">📭 Sin clases</option>
+      <option value="error">❌ Error de carga</option>
+    </select>
+    <button onclick="renderizarClases()">Probar</button>
+  </div>
+
+  <div id="message" class="message" role="status" aria-live="polite">Cargando datos...</div>
+
+  <div class="table-container">
+    <table id="clasesTabla">
+      <thead>
+        <tr>
+          <th>Duración</th>
+          <th>Aceptada</th>
+          <th>Factura pagada</th>
+          <th># Factura</th>
+          <th>Monto pagado</th>
+          <th>Fecha de pago</th>
+          <th>Estado especial</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    const messageDiv = document.getElementById('message');
+    const tablaBody = document.querySelector('#clasesTabla tbody');
+    const estadoSelect = document.getElementById('estadoSimulado');
+    const btnDisponible = document.getElementById('btnDisponible');
+
+    let profesor = JSON.parse(localStorage.getItem('c2nProfesorActivo') || 'null');
+
+    function renderizarClases() {
+      const estado = estadoSelect.value;
+      tablaBody.innerHTML = '';
+
+      if (estado === 'error') {
+        messageDiv.textContent = '❌ Error al cargar los datos.';
+        messageDiv.className = 'message error';
+        return;
+      }
+
+      if (estado === 'empty') {
+        messageDiv.textContent = '📭 No hay clases disponibles.';
+        messageDiv.className = 'message';
+        return;
+      }
+
+      messageDiv.textContent = '';
+      messageDiv.className = 'message';
+
+      const clasesSimuladas = [
+        {
+          duracion: '1 hora',
+          aceptada: true,
+          facturaPagada: true,
+          numFactura: 'F001',
+          montoPagado: '$350',
+          fechaPago: '2025-07-10',
+        },
+        {
+          duracion: '30 minutos',
+          aceptada: false,
+          facturaPagada: false,
+          numFactura: '',
+          montoPagado: '',
+          fechaPago: '',
+        },
+        {
+          duracion: '1 hora',
+          aceptada: true,
+          facturaPagada: false,
+          numFactura: 'F002',
+          montoPagado: '$350',
+          fechaPago: '2025-07-11',
+        }
+      ];
+
+      clasesSimuladas.forEach(clase => {
+        const tr = document.createElement('tr');
+
+        tr.innerHTML = `
+          <td>${clase.duracion}</td>
+          <td class="${!clase.aceptada ? 'estado-no-aceptada' : ''}">${clase.aceptada ? 'Sí' : 'No'}</td>
+          <td class="${!clase.facturaPagada ? 'estado-factura-no-pagada' : ''}">${clase.facturaPagada ? 'Sí' : 'No'}</td>
+          <td>${clase.aceptada ? clase.numFactura : '-'}</td>
+          <td>${clase.aceptada ? clase.montoPagado : '-'}</td>
+          <td>${clase.aceptada ? clase.fechaPago : '-'}</td>
+          <td>${
+            !clase.aceptada
+              ? 'Clase no aceptada'
+              : !clase.facturaPagada
+              ? 'Factura pendiente'
+              : '-'
+          }</td>
+        `;
+
+        tablaBody.appendChild(tr);
+      });
+    }
+
+    function cerrarSesion() {
+      localStorage.removeItem('c2nProfesorActivo');
+      alert('Sesión cerrada. Redirigiendo al login...');
+      window.location.href = 'profesorindex.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!profesor || !profesor.email) {
+        alert('No tienes sesión activa. Redirigiendo...');
+        window.location.href = 'profesorindex.html';
+        return;
+      }
+
+      btnDisponible.textContent = profesor.disponible ? '🔴 No disponible' : '🟢 Estoy disponible';
+
+      btnDisponible.addEventListener('click', () => {
+        profesor.disponible = !profesor.disponible;
+        localStorage.setItem('c2nProfesorActivo', JSON.stringify(profesor));
+        btnDisponible.textContent = profesor.disponible ? '🔴 No disponible' : '🟢 Estoy disponible';
+      });
+
+      renderizarClases();
+    });
+
+    // 🔄 Revisar nuevas solicitudes cada 3 segundos
+    setInterval(() => {
+      const solicitudes = JSON.parse(localStorage.getItem('c2nSolicitudes') || '[]');
+      const nueva = solicitudes.find(s =>
+        s.estado === 'pendiente' &&
+        profesor.disponible &&
+        profesor.materias &&
+        profesor.materias.includes(s.tema) &&
+        !document.querySelector(`#modal-${s.id}`)
+      );
+
+      if (nueva) {
+        mostrarModalSolicitud(nueva);
+      }
+    }, 3000);
+
+    // 🔔 Mostrar modal con sonido
+    function mostrarModalSolicitud(solicitud) {
+      const modal = document.createElement('div');
+      modal.id = `modal-${solicitud.id}`;
+      modal.style.position = 'fixed';
+      modal.style.top = '0';
+      modal.style.left = '0';
+      modal.style.width = '100%';
+      modal.style.height = '100%';
+      modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+      modal.style.display = 'flex';
+      modal.style.justifyContent = 'center';
+      modal.style.alignItems = 'center';
+      modal.style.zIndex = '1000';
+
+      let pagoTexto = '';
+      if (solicitud.tipoPago === 'T' || solicitud.tipoPago === 'E' || solicitud.tipoPago === 'P1') {
+        pagoTexto = '$300';
+      } else {
+        pagoTexto = '$5.50 / minuto';
+      }
+
+      modal.innerHTML = `
+        <div style="background:white; padding:30px; border-radius:10px; text-align:center; max-width:400px;">
+          <h2>💡 Solicitud de clase inmediata</h2>
+          <p><strong>Tema:</strong> ${solicitud.tema}</p>
+          <p><strong>Fecha:</strong> ${solicitud.fecha}</p>
+          <p><strong>Hora:</strong> ${solicitud.hora}</p>
+          <p><strong>Duración:</strong> 1 hora</p>
+          <p><strong>Pago:</strong> ${pagoTexto}</p>
+          <button style="margin-top:20px; padding:10px 20px; background:#2563eb; color:white; border:none; border-radius:5px; font-size:1em; cursor:pointer;"
+            onclick="aceptarDesdeModal('${solicitud.id}')">Aceptar clase</button>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+
+      const audio = new Audio("https://notificationsounds.com/storage/sounds/file-sounds-1141-pristine.mp3");
+      audio.play();
+    }
+
+    // Redirigir a aceptar
+    function aceptarDesdeModal(id) {
+      window.location.href = "solicitudes-profesor.html?solicitud=" + id;
+    }
+  </script>
+</body>
+</html>
