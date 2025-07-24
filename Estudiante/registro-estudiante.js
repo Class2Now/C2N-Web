@@ -14,9 +14,9 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("password").value = datosGuardados.password || "";
   }
 
-  let terminoLeido = false;
+  linkTerminos.addEventListener("click", (e) => {
+    e.preventDefault();
 
-  linkTerminos.addEventListener("click", () => {
     // Guardar datos temporalmente
     const tempDatos = {
       nombre: document.getElementById("nombre").value.trim(),
@@ -28,12 +28,13 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     sessionStorage.setItem("registroTempEstudiante", JSON.stringify(tempDatos));
 
+    // Abrir Términos y esperar cierre
     const win = window.open("terminos-condiciones.html", "_blank");
-    const checker = setInterval(() => {
+    const checkVentana = setInterval(() => {
       if (win.closed) {
-        clearInterval(checker);
-        terminoLeido = true;
+        clearInterval(checkVentana);
         terminosCheckbox.disabled = false;
+        terminosCheckbox.focus(); // ayuda visual
       }
     }, 500);
   });
